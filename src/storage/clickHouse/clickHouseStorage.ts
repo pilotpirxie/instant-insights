@@ -39,18 +39,21 @@ export class ClickHouseStorage implements DataStorage {
       params: event.params,
       created_at: dayjs().format("YYYY-MM-DD HH:mm:ss"),
     });
-    if (this.localEvents.length >= Number(process.env.BATCH_INSERT_MAX || 100)) {
+
+    const batchInsertMax = Number(process.env.BATCH_INSERT_MAX || 100);
+
+    if (this.localEvents.length >= batchInsertMax) {
       this.clickHouse.insert({
         table: "events",
         values: this.localEvents,
         format: "JSONEachRow",
       }).then(() => {
-        console.info("Inserted batch of", Number(process.env.BATCH_INSERT_MAX || 100), "events");
+        console.info("Inserted batch of", batchInsertMax, "events");
         this.localEvents = [];
         return Promise.resolve();
       }).catch((err) => {
-        console.error("Failed to insert", Number(process.env.BATCH_INSERT_MAX || 100), "events");
-        if (process.env.DROP_EVENTS_ON_ERROR === "1") {
+        console.error("Failed to insert", batchInsertMax, "events");
+        if (process.env.DROP_EVENTS_ON_INSERT_ERROR === "1") {
           this.localEvents = [];
         }
         return Promise.reject(err);
@@ -63,19 +66,19 @@ export class ClickHouseStorage implements DataStorage {
     let query = "SELECT * FROM events WHERE app_id={appIdParam: UUID} AND created_at >= {dateFromParam: DATETIME}";
 
     if (search.dateTo) {
-      query += "AND created_at <= {dateToParam: DATETIME}";
+      query += " AND created_at <= {dateToParam: DATETIME}";
     }
 
     if (search.type) {
-      query += "AND type = {typeParam: VARCHAR}";
+      query += " AND type = {typeParam: VARCHAR}";
     }
 
-    query += "LIMIT {limitParam: INT}";
+    query += " LIMIT {limitParam: INT}";
 
     const events = await this.clickHouse.query({
       query,
       query_params: {
-        appIdParam: "2009c796-46be-423f-a590-8bb8078d0dcd",
+        appIdParam: search.appId,
         dateFromParam: dayjs(search.dateFrom).format("YYYY-MM-DD HH:mm:ss"),
         dateToParam: search.dateTo ? dayjs(search.dateTo).format("YYYY-MM-DD HH:mm:ss") : "",
         typeParam: search.type || "",

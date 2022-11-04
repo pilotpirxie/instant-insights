@@ -2,9 +2,10 @@ import { Event } from "../domain/event";
 
 export type AddEventType = Omit<Event, "id" | "createdAt">;
 export type SearchForEventsType = {
-  type?: string,
-  limit: number,
+  appId: string,
   dateFrom: Date,
+  limit: number,
+  type?: string,
   dateTo?: Date
 }
 

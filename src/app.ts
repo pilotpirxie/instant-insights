@@ -19,6 +19,9 @@ const clickHouseClient = createClient({
   connect_timeout: Number(process.env.CLICKHOUSE_CONNECT_TIMEOUT || 10000),
   request_timeout: Number(process.env.CLICKHOUSE_REQUEST_TIMEOUT || 30000),
   max_open_connections: Number(process.env.CLICKHOUSE_MAX_OPEN_CONNECTIONS || Infinity),
+  log: {
+    enable: true,
+  },
 });
 
 const clickHouseStorage = new ClickHouseStorage(clickHouseClient);
@@ -45,6 +48,7 @@ clickHouseStorage.addEvent({
   },
 }).then(async () => {
   const events = await clickHouseStorage.getEvents({
+    appId: "2009c796-46be-423f-a590-8bb8078d0dcd",
     dateFrom: dayjs().subtract(10, "minute").toDate(),
     limit: 2,
     type: "click2",
