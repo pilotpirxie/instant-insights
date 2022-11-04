@@ -1,10 +1,11 @@
-import 'dotenv';
-import { Router } from 'express';
-import Joi from 'joi';
-import validation from '../middlewares/validation';
-import { TypedRequest } from '../types/express';
+import "dotenv";
+import { Router } from "express";
+import Joi from "joi";
+import validation from "../middlewares/validation";
+import { TypedRequest } from "../types/express";
+import { DataStorage } from "../storage/dataStorage";
 
-export function initializeEventsController(): Router {
+export function initializeEventsController(dataStorage: DataStorage): Router {
   const router = Router();
 
   const addEventSchema = {
@@ -20,9 +21,20 @@ export function initializeEventsController(): Router {
     },
   };
 
-  router.post('/', validation(addEventSchema), async (req: TypedRequest<typeof addEventSchema>, res, next) => {
+  router.post("/", validation(addEventSchema), async (req: TypedRequest<typeof addEventSchema>, res, next) => {
     try {
-      const { params } = req.body;
+      const {
+        appId, type, params, user,
+      } = req.body;
+
+      dataStorage.addEvent({
+        params,
+        user,
+        type,
+        appId,
+      }).catch((err) => {
+        console.error("Failed to insert event", err);
+      });
       return res.sendStatus(200);
     } catch (e) {
       return next(e);

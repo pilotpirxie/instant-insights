@@ -40,7 +40,7 @@ export class ClickHouseStorage implements DataStorage {
       created_at: dayjs().format("YYYY-MM-DD HH:mm:ss"),
     });
 
-    const batchInsertMax = Number(process.env.BATCH_INSERT_MAX || 100);
+    const batchInsertMax = Number(process.env.BATCH_INSERT_EVERY || 100);
 
     if (this.localEvents.length >= batchInsertMax) {
       this.clickHouse.insert({
