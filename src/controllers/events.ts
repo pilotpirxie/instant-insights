@@ -12,6 +12,7 @@ export function initializeEventsController(dataStorage: DataStorage): Router {
     body: {
       appId: Joi.number().required(),
       type: Joi.string().required(),
+      pathname: Joi.string().required(),
       meta: Joi.object({
         os: Joi.string(),
         osVersion: Joi.string(),
@@ -25,14 +26,15 @@ export function initializeEventsController(dataStorage: DataStorage): Router {
   router.post("/", validation(addEventSchema), async (req: TypedRequest<typeof addEventSchema>, res, next) => {
     try {
       const {
-        appId, type, params, meta,
+        appId, pathname, type, params, meta,
       } = req.body;
 
       dataStorage.addEvent({
+        appId,
+        pathname,
         params,
         meta,
         type,
-        appId,
       }).catch((err) => {
         console.error("Failed to insert event", err);
       });

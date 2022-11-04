@@ -2,6 +2,7 @@ import { Event } from "../domain/event";
 
 export type AddEventType = {
   appId: number,
+  pathname: string,
   type: string,
   meta: { [p: string]: string },
   params: { [p: string]: string },

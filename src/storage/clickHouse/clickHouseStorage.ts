@@ -33,6 +33,7 @@ export class ClickHouseStorage implements DataStorage {
   async addEvent(event: AddEventType): Promise<void> {
     this.localEvents.push({
       app_id: event.appId,
+      pathname: event.pathname,
       type: event.type,
       meta: event.meta,
       params: event.params,

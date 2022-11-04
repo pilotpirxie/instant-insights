@@ -7,6 +7,7 @@ export type AppEntity = {
 
 export type EventEntity = {
   app_id: number,
+  pathname: string,
   type: string,
   meta: { [p: string]: string },
   params: { [p: string]: string },
