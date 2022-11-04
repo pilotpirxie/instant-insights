@@ -1,11 +1,11 @@
-import "dotenv";
-import { ClickHouseClient } from "@clickhouse/client";
-import path from "path";
-import fs from "fs";
-import dayjs from "dayjs";
-import { AddEventType, DataStorage, SearchForEventsType } from "../dataStorage";
-import { EventEntity } from "./entities";
-import { Event } from "../../domain/event";
+import 'dotenv';
+import { ClickHouseClient } from '@clickhouse/client';
+import path from 'path';
+import fs from 'fs';
+import dayjs from 'dayjs';
+import { AddEventType, DataStorage, SearchForEventsType } from '../dataStorage';
+import { EventEntity } from './entities';
+import { Event } from '../../domain/event';
 
 export class ClickHouseStorage implements DataStorage {
   private clickHouse: ClickHouseClient;
@@ -19,11 +19,12 @@ export class ClickHouseStorage implements DataStorage {
 
   async migrate(dir: string): Promise<void> {
     const files = fs.readdirSync(dir);
-    files.sort((a, b) => Number(a.split("_")[0]) - Number(b.split("_")[0]));
-    for (const file of files) {
+    files.sort((a, b) => Number(a.split('_')[0]) - Number(b.split('_')[0]));
+    for (let i = 0; i < files.length; i++) {
+      const file = files[i];
       const migrationFile = path.join(dir, file);
       console.info(`Migration ${migrationFile}`);
-      const migrationFileContent = fs.readFileSync(migrationFile, { encoding: "utf8" });
+      const migrationFileContent = fs.readFileSync(migrationFile, { encoding: 'utf8' });
       await this.clickHouse.exec({
         query: migrationFileContent,
       });
@@ -37,23 +38,23 @@ export class ClickHouseStorage implements DataStorage {
       type: event.type,
       meta: event.meta,
       params: event.params,
-      created_at: dayjs().format("YYYY-MM-DD HH:mm:ss"),
+      created_at: dayjs().format('YYYY-MM-DD HH:mm:ss'),
     });
 
     const batchInsertMax = Number(process.env.BATCH_INSERT_EVERY || 100);
 
     if (this.localEvents.length >= batchInsertMax) {
       this.clickHouse.insert({
-        table: "events",
+        table: 'events',
         values: this.localEvents,
-        format: "JSONEachRow",
+        format: 'JSONEachRow',
       }).then(() => {
-        console.info("Inserted batch of", batchInsertMax, "events");
+        console.info('Inserted batch of', batchInsertMax, 'events');
         this.localEvents = [];
         return Promise.resolve();
       }).catch((err) => {
-        console.error("Failed to insert", batchInsertMax, "events");
-        if (process.env.DROP_EVENTS_ON_INSERT_ERROR === "1") {
+        console.error('Failed to insert', batchInsertMax, 'events');
+        if (process.env.DROP_EVENTS_ON_INSERT_ERROR === '1') {
           this.localEvents = [];
         }
         return Promise.reject(err);
@@ -63,31 +64,31 @@ export class ClickHouseStorage implements DataStorage {
   }
 
   async getEvents(search: SearchForEventsType): Promise<Event[]> {
-    let query = "SELECT * FROM events WHERE app_id={appIdParam: UUID} AND created_at >= {dateFromParam: DATETIME}";
+    let query = 'SELECT * FROM events WHERE app_id={appIdParam: UUID} AND created_at >= {dateFromParam: DATETIME}';
 
     if (search.dateTo) {
-      query += " AND created_at <= {dateToParam: DATETIME}";
+      query += ' AND created_at <= {dateToParam: DATETIME}';
     }
 
     if (search.type) {
-      query += " AND type = {typeParam: VARCHAR}";
+      query += ' AND type = {typeParam: VARCHAR}';
     }
 
-    query += " LIMIT {limitParam: INT}";
+    query += ' LIMIT {limitParam: INT}';
 
     const events = await this.clickHouse.query({
       query,
       query_params: {
         appIdParam: search.appId,
-        dateFromParam: dayjs(search.dateFrom).format("YYYY-MM-DD HH:mm:ss"),
-        dateToParam: search.dateTo ? dayjs(search.dateTo).format("YYYY-MM-DD HH:mm:ss") : "",
-        typeParam: search.type || "",
+        dateFromParam: dayjs(search.dateFrom).format('YYYY-MM-DD HH:mm:ss'),
+        dateToParam: search.dateTo ? dayjs(search.dateTo).format('YYYY-MM-DD HH:mm:ss') : '',
+        typeParam: search.type || '',
         limitParam: search.limit || 100,
       },
-      format: "JSONEachRow",
+      format: 'JSONEachRow',
     });
     const eventsData = await events.json() as Event[];
-    console.info("Found", eventsData.length, "events");
+    console.info('Found', eventsData.length, 'events');
     return Promise.resolve(eventsData);
   }
 }

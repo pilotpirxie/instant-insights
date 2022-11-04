@@ -1,4 +1,4 @@
-import { Event } from "../domain/event";
+import { Event } from '../domain/event';
 
 export type AddEventType = {
   appId: number,
