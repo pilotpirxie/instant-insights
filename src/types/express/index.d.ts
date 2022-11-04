@@ -1,5 +1,5 @@
-import {Request} from 'express';
-import {ParamsDictionary, Query} from 'express-serve-static-core';
+import { Request } from 'express';
+import { ParamsDictionary, Query } from 'express-serve-static-core';
 import {
   ArraySchema,
   BinarySchema,
@@ -39,7 +39,7 @@ type PayloadDictionary<T> = {
               : T[P] extends BinarySchema
                 ? Buffer
                 : T[P] extends ObjectSchema
-                  ? Object
+                  ? Object<any>
                   : T[P] extends SymbolSchema
                     ? symbol
                     : any;
