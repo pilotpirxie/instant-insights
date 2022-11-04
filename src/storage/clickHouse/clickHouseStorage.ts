@@ -4,7 +4,7 @@ import path from "path";
 import fs from "fs";
 import dayjs from "dayjs";
 import { AddEventType, DataStorage, SearchForEventsType } from "../dataStorage";
-import { EventEntity } from "./dataTypes";
+import { EventEntity } from "./entities";
 import { Event } from "../../domain/event";
 
 export class ClickHouseStorage implements DataStorage {
@@ -32,10 +32,9 @@ export class ClickHouseStorage implements DataStorage {
 
   async addEvent(event: AddEventType): Promise<void> {
     this.localEvents.push({
-      id: undefined,
       app_id: event.appId,
       type: event.type,
-      user: event.user,
+      meta: event.meta,
       params: event.params,
       created_at: dayjs().format("YYYY-MM-DD HH:mm:ss"),
     });

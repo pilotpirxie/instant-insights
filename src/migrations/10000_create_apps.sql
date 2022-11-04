@@ -1,6 +1,6 @@
 CREATE TABLE IF NOT EXISTS insights.apps
 (
-    id         UUID     DEFAULT generateUUIDv4(),
+    id         INT,
     name       VARCHAR,
     created_at DATETIME DEFAULT now(),
     updated_at DATETIME DEFAULT now()

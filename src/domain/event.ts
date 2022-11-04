@@ -1,8 +1,7 @@
 export type Event = {
-  id: string,
-  appId: string,
+  appId: number,
   type: string,
-  user: { [p: string]: string },
+  meta: { [p: string]: string },
   params: { [p: string]: string },
   createdAt: string,
 }

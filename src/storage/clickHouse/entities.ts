@@ -1,8 +1,7 @@
 export type EventEntity = {
-  id?: string,
-  app_id: string,
+  app_id: number,
   type: string,
-  user: { [p: string]: string },
+  meta: { [p: string]: string },
   params: { [p: string]: string },
   created_at?: string,
 }

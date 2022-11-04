@@ -10,12 +10,13 @@ export function initializeEventsController(dataStorage: DataStorage): Router {
 
   const addEventSchema = {
     body: {
-      appId: Joi.string().required(),
+      appId: Joi.number().required(),
       type: Joi.string().required(),
-      user: Joi.object({
+      meta: Joi.object({
         os: Joi.string(),
         osVersion: Joi.string(),
         userId: Joi.string(),
+        ipAddress: Joi.string(),
       }).required(),
       params: Joi.object().required(),
     },
@@ -24,12 +25,12 @@ export function initializeEventsController(dataStorage: DataStorage): Router {
   router.post("/", validation(addEventSchema), async (req: TypedRequest<typeof addEventSchema>, res, next) => {
     try {
       const {
-        appId, type, params, user,
+        appId, type, params, meta,
       } = req.body;
 
       dataStorage.addEvent({
         params,
-        user,
+        meta,
         type,
         appId,
       }).catch((err) => {

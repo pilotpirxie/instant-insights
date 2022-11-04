@@ -1,9 +1,8 @@
 CREATE TABLE IF NOT EXISTS insights.events
 (
-    id         UUID     DEFAULT generateUUIDv4(),
-    app_id     UUID,
+    app_id     INT,
     type       VARCHAR,
-    user Map(String, String),
+    meta Map(String, String),
     params Map(String, String),
     created_at DATETIME DEFAULT now()
 )

@@ -30,7 +30,7 @@ clickHouseStorage.migrate(path.join(__dirname, "migrations")).then(() => {
   process.exit(1);
 });
 
-app.use(bodyParser.json());
+app.use(bodyParser.json({ limit: process.env.MAX_EVENT_SIZE || "1KB" }));
 
 app.use("/api/events", initializeEventsController(clickHouseStorage));
 
