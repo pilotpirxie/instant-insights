@@ -1,0 +1,10 @@
+version: '3.9'
+
+services:
+  db:
+    image: postgres:latest
+    ports:
+      - 6379:6379
+    command: redis-server --save 60 1 --requirepass mysecretpassword --loglevel warning
+    volumes:
+      - ./.docker/redis:/data
