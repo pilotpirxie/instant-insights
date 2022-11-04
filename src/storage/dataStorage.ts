@@ -1,6 +1,12 @@
 import { Event } from "../domain/event";
 
-export type AddEventType = Omit<Event, "createdAt">;
+export type AddEventType = {
+  appId: number,
+  type: string,
+  meta: { [p: string]: string },
+  params: { [p: string]: string },
+};
+
 export type SearchForEventsType = {
   appId: string,
   dateFrom: Date,
