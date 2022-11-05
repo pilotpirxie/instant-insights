@@ -18,3 +18,4 @@ services:
       CLICKHOUSE_USER: secretuser
       CLICKHOUSE_PASSWORD: mysecretpassword
       CLICKHOUSE_DEFAULT_ACCESS_MANAGEMENT: 1
+    restart: unless-stopped
