@@ -1,5 +1,6 @@
 CREATE TABLE IF NOT EXISTS insights.events
 (
+    id UUID DEFAULT generateUUIDv4(),
     type       VARCHAR,
     pathname       VARCHAR,
     fingerprint       VARCHAR,

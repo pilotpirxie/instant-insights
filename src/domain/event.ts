@@ -1,4 +1,5 @@
 export type Event = {
+  id: string,
   type: string,
   pathname: string,
   fingerprint: string,
