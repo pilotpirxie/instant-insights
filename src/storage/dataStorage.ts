@@ -1,4 +1,6 @@
 import { Event } from '../domain/event';
+import { Type } from '../domain/type';
+import { Pathname } from '../domain/pathname';
 
 export type AddEvent = {
   pathname: string,
@@ -29,7 +31,7 @@ export type CountOnline = {
 export interface DataStorage {
   addEvent(event: AddEvent): Promise<void>;
   getEvents(search: SearchForEvents): Promise<Event[]>;
-  getPathnames(search: Timespan): Promise<string[]>;
-  getTypes(search: Timespan): Promise<string[]>;
+  getPathnames(search: Timespan): Promise<Pathname[]>;
+  getTypes(search: Timespan): Promise<Type[]>;
   countOnline(online: CountOnline): Promise<number>;
 }

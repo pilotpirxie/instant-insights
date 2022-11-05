@@ -10,6 +10,8 @@ import {
 } from '../dataStorage';
 import { EventEntity } from './entities';
 import { Event } from '../../domain/event';
+import { Pathname } from '../../domain/pathname';
+import { Type } from '../../domain/type';
 
 dayjs.extend(utc);
 
@@ -97,7 +99,7 @@ export class ClickHouseStorage implements DataStorage {
       query += ' AND fingerprint = {fingerprint: VARCHAR}';
     }
 
-    query += ' LIMIT {limit: INT}';
+    query += ' ORDER BY created_at DESC LIMIT {limit: INT}';
 
     const response = await this.clickHouse.query({
       query,
@@ -120,13 +122,11 @@ export class ClickHouseStorage implements DataStorage {
   async countOnline({ pathname }: CountOnline): Promise<number> {
     const onlineTimespan = Number(process.env.ONLINE_TIMESPAN || 5);
 
-    let subquery = 'SELECT DISTINCT(fingerprint) fingerprint FROM insights.events WHERE (created_at > now() - INTERVAL {onlineTimespan: INT} MINUTE)';
+    let query = 'SELECT COUNT(DISTINCT fingerprint) as online FROM events WHERE (created_at > now() - INTERVAL {onlineTimespan: INT} MINUTE)';
 
     if (pathname) {
-      subquery += ' AND pathname={pathname: VARCHAR}';
+      query += ' AND pathname={pathname: VARCHAR}';
     }
-
-    const query = `SELECT COUNT(fingerprint) as online FROM (${subquery})`;
 
     const response = await this.clickHouse.query({
       query,
@@ -143,12 +143,14 @@ export class ClickHouseStorage implements DataStorage {
     return Promise.resolve(online);
   }
 
-  async getPathnames({ dateTo, dateFrom }: Timespan): Promise<string[]> {
-    let query = 'SELECT DISTINCT(pathname) pathname FROM insights.events WHERE created_at >= {dateFrom: DATETIME}';
+  async getPathnames({ dateTo, dateFrom }: Timespan): Promise<Pathname[]> {
+    let query = 'SELECT pathname, COUNT(*) count FROM events WHERE created_at >= {dateFrom: DATETIME}';
 
     if (dateTo) {
       query += ' AND created_at <= {dateTo: DATETIME}';
     }
+
+    query += ' GROUP BY pathname ORDER BY count DESC';
 
     const response = await this.clickHouse.query({
       query,
@@ -159,16 +161,18 @@ export class ClickHouseStorage implements DataStorage {
       format: 'JSONEachRow',
     });
 
-    const parsedResponse = await response.json() as {pathname: string}[];
-    return Promise.resolve(parsedResponse.map((row) => row.pathname));
+    const parsedResponse = await response.json() as Pathname[];
+    return Promise.resolve(parsedResponse);
   }
 
-  async getTypes({ dateTo, dateFrom }: Timespan): Promise<string[]> {
-    let query = 'SELECT DISTINCT(type) type FROM insights.events WHERE created_at >= {dateFrom: DATETIME}';
+  async getTypes({ dateTo, dateFrom }: Timespan): Promise<Type[]> {
+    let query = 'SELECT type, COUNT(*) count FROM events WHERE created_at >= {dateFrom: DATETIME}';
 
     if (dateTo) {
       query += ' AND created_at <= {dateTo: DATETIME}';
     }
+
+    query += ' GROUP BY type ORDER BY count DESC';
 
     const response = await this.clickHouse.query({
       query,
@@ -179,7 +183,7 @@ export class ClickHouseStorage implements DataStorage {
       format: 'JSONEachRow',
     });
 
-    const parsedResponse = await response.json() as {type: string}[];
-    return Promise.resolve(parsedResponse.map((row) => row.type));
+    const parsedResponse = await response.json() as Type[];
+    return Promise.resolve(parsedResponse);
   }
 }
