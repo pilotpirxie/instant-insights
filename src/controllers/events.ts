@@ -13,6 +13,9 @@ export function initializeEventsController(dataStorage: DataStorage): Router {
   const router = Router();
 
   const addEventSchema = {
+    query: {
+      token: Joi.string().required(),
+    },
     body: {
       type: Joi.string().required(),
       pathname: Joi.string().required(),
@@ -29,6 +32,9 @@ export function initializeEventsController(dataStorage: DataStorage): Router {
 
   router.post('/', validation(addEventSchema), async (req: TypedRequest<typeof addEventSchema>, res, next) => {
     try {
+      const { token } = req.query;
+      if (token !== process.env.API_WRITE_TOKEN) return res.sendStatus(401);
+
       const {
         pathname, type, params, meta, fingerprint,
       } = req.body;

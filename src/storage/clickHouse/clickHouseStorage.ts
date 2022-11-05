@@ -4,6 +4,7 @@ import path from 'path';
 import fs from 'fs';
 import dayjs from 'dayjs';
 import utc from 'dayjs/plugin/utc';
+import { CronJob } from 'cron';
 import {
   AddEventType, CountOnlineType, DataStorage, SearchForEventsType,
 } from '../dataStorage';
@@ -15,11 +16,35 @@ dayjs.extend(utc);
 export class ClickHouseStorage implements DataStorage {
   private clickHouse: ClickHouseClient;
 
+  private cron: CronJob;
+
   private localEvents: EventEntity[];
 
   constructor(clickHouse: ClickHouseClient) {
     this.clickHouse = clickHouse;
     this.localEvents = [];
+    this.cron = new CronJob(process.env.CRON_INSERT_PATTERN || '* * * * * *', () => this.bulkInsert(), null);
+    this.cron.start();
+  }
+
+  async bulkInsert() {
+    if (this.clickHouse !== undefined) {
+      this.clickHouse.insert({
+        table: 'events',
+        values: [...this.localEvents],
+        format: 'JSONEachRow',
+      }).then(() => {
+        console.info(Date.now(), 'Inserted batch of', this.localEvents.length, 'events');
+        this.localEvents = [];
+        return Promise.resolve();
+      }).catch((err) => {
+        console.error('Failed to insert', this.localEvents.length, 'events');
+        if (process.env.DISCARD_EVENTS_ON_INSERT_ERROR === '1') {
+          this.localEvents = [];
+        }
+        return Promise.reject(err);
+      });
+    }
   }
 
   async migrate(dir: string): Promise<void> {
@@ -46,26 +71,6 @@ export class ClickHouseStorage implements DataStorage {
       params: event.params,
       created_at: dayjs().utc().format('YYYY-MM-DD HH:mm:ss'),
     });
-
-    const batchInsertMax = Number(process.env.BATCH_INSERT_EVERY || 100);
-
-    if (this.localEvents.length >= batchInsertMax) {
-      this.clickHouse.insert({
-        table: 'events',
-        values: this.localEvents,
-        format: 'JSONEachRow',
-      }).then(() => {
-        console.info('Inserted batch of', batchInsertMax, 'events');
-        this.localEvents = [];
-        return Promise.resolve();
-      }).catch((err) => {
-        console.error('Failed to insert', batchInsertMax, 'events');
-        if (process.env.DISCARD_EVENTS_ON_INSERT_ERROR === '1') {
-          this.localEvents = [];
-        }
-        return Promise.reject(err);
-      });
-    }
     return Promise.resolve();
   }
 
