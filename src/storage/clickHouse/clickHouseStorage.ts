@@ -127,8 +127,6 @@ export class ClickHouseStorage implements DataStorage {
 
     const query = `SELECT COUNT(fingerprint) as online FROM (${subquery})`;
 
-    console.log(query);
-
     const response = await this.clickHouse.query({
       query,
       query_params: {
@@ -140,7 +138,6 @@ export class ClickHouseStorage implements DataStorage {
     });
 
     const parsedResponse = await response.json() as {online: number}[];
-    console.log(parsedResponse);
     const online = Number(parsedResponse[0].online);
     console.info('Found', online, 'online users in the last', onlineTimespan, 'minutes');
     return Promise.resolve(online);
