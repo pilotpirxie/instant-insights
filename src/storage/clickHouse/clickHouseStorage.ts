@@ -3,9 +3,14 @@ import { ClickHouseClient } from '@clickhouse/client';
 import path from 'path';
 import fs from 'fs';
 import dayjs from 'dayjs';
-import { AddEventType, DataStorage, SearchForEventsType } from '../dataStorage';
+import utc from 'dayjs/plugin/utc';
+import {
+  AddEventType, CountOnlineType, DataStorage, SearchForEventsType,
+} from '../dataStorage';
 import { EventEntity } from './entities';
 import { Event } from '../../domain/event';
+
+dayjs.extend(utc);
 
 export class ClickHouseStorage implements DataStorage {
   private clickHouse: ClickHouseClient;
@@ -36,10 +41,11 @@ export class ClickHouseStorage implements DataStorage {
     this.localEvents.push({
       app_id: event.appId,
       pathname: event.pathname,
+      fingerprint: event.fingerprint,
       type: event.type,
       meta: event.meta,
       params: event.params,
-      created_at: dayjs().format('YYYY-MM-DD HH:mm:ss'),
+      created_at: dayjs().utc().format('YYYY-MM-DD HH:mm:ss'),
     });
 
     const batchInsertMax = Number(process.env.BATCH_INSERT_EVERY || 100);
@@ -64,46 +70,79 @@ export class ClickHouseStorage implements DataStorage {
     return Promise.resolve();
   }
 
-  async getEvents(search: SearchForEventsType): Promise<Event[]> {
-    let query = 'SELECT * FROM events WHERE app_id={appIdParam: INT} AND created_at >= {dateFromParam: DATETIME}';
+  async getEvents({
+    pathname, appId, type, fingerprint, dateFrom, dateTo, limit,
+  }: SearchForEventsType): Promise<Event[]> {
+    let query = 'SELECT * FROM events WHERE app_id={appId: INT} AND created_at >= {dateFrom: DATETIME}';
 
-    if (search.dateTo) {
-      query += ' AND created_at <= {dateToParam: DATETIME}';
+    if (dateTo) {
+      query += ' AND created_at <= {dateTo: DATETIME}';
     }
 
-    if (search.pathname) {
-      query += ' AND pathname = {pathnameParam: VARCHAR}';
+    if (pathname) {
+      query += ' AND pathname = {pathname: VARCHAR}';
     }
 
-    if (search.type) {
-      query += ' AND type = {typeParam: VARCHAR}';
+    if (type) {
+      query += ' AND type = {type: VARCHAR}';
     }
 
-    query += ' LIMIT {limitParam: INT}';
+    if (fingerprint) {
+      query += ' AND fingerprint = {fingerprint: VARCHAR}';
+    }
 
-    console.log(search.dateFrom, {
-      appIdParam: search.appId,
-      dateFromParam: dayjs(search.dateFrom).format('YYYY-MM-DD HH:mm:ss'),
-      dateToParam: search.dateTo ? dayjs(search.dateTo).format('YYYY-MM-DD HH:mm:ss') : '',
-      typeParam: search.type || '',
-      pathnameParam: search.pathname || '',
-      limitParam: search.limit || 100,
-    });
+    query += ' LIMIT {limit: INT}';
 
-    const events = await this.clickHouse.query({
+    const response = await this.clickHouse.query({
       query,
       query_params: {
-        appIdParam: search.appId,
-        dateFromParam: dayjs(search.dateFrom).format('YYYY-MM-DD HH:mm:ss'),
-        dateToParam: search.dateTo ? dayjs(search.dateTo).format('YYYY-MM-DD HH:mm:ss') : '',
-        typeParam: search.type || '',
-        pathnameParam: search.pathname || '',
-        limitParam: search.limit || 100,
+        appId,
+        dateFrom: dayjs(dateFrom).utc().format('YYYY-MM-DD HH:mm:ss'),
+        dateTo: dateTo ? dayjs(dateTo).utc().format('YYYY-MM-DD HH:mm:ss') : '',
+        typeParam: type || '',
+        pathname: pathname || '',
+        limit: limit || 100,
+        fingerprint: fingerprint || '',
       },
       format: 'JSONEachRow',
     });
-    const eventsData = await events.json() as Event[];
-    console.info('Found', eventsData.length, 'events');
-    return Promise.resolve(eventsData);
+
+    const events = await response.json() as Event[];
+    console.info('Found', events.length, 'events');
+    return Promise.resolve(events);
+  }
+
+  async countOnline({ pathname, appId }: CountOnlineType): Promise<number> {
+    const onlineTimespan = Number(process.env.ONLINE_TIMESPAN || 5);
+
+    let subquery = 'SELECT DISTINCT(fingerprint) fingerprint FROM insights.events WHERE (created_at > now() - INTERVAL {onlineTimespan: INT} MINUTE)';
+
+    if (appId) {
+      subquery += ' AND app_id={appId: INT}';
+    }
+
+    if (pathname) {
+      subquery += ' AND pathname={pathname: VARCHAR}';
+    }
+
+    const query = `SELECT COUNT(fingerprint) as online FROM (${subquery})`;
+
+    console.log(query);
+
+    const response = await this.clickHouse.query({
+      query,
+      query_params: {
+        onlineTimespan,
+        pathname: pathname || '',
+        appId,
+      },
+      format: 'JSONEachRow',
+    });
+
+    const parsedResponse = await response.json() as {online: number}[];
+    console.log(parsedResponse);
+    const online = Number(parsedResponse[0].online);
+    console.info('Found', online, 'online users in the last', onlineTimespan, 'minutes');
+    return Promise.resolve(online);
   }
 }

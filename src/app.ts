@@ -6,6 +6,7 @@ import path from 'path';
 import { errorHandler } from './middlewares/errors';
 import { ClickHouseStorage } from './storage/clickHouse/clickHouseStorage';
 import { initializeEventsController } from './controllers/events';
+import { initializeOnlineController } from './controllers/online';
 
 dotenv.config();
 const port = process.env.PORT || 3000;
@@ -33,6 +34,7 @@ clickHouseStorage.migrate(path.join(__dirname, 'migrations')).then(() => {
 app.use(bodyParser.json({ limit: process.env.MAX_EVENT_SIZE || '1KB' }));
 
 app.use('/api/events', initializeEventsController(clickHouseStorage));
+app.use('/api/online', initializeOnlineController(clickHouseStorage));
 
 app.use(errorHandler);
 
