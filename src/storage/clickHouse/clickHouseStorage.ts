@@ -14,7 +14,7 @@ import { Event } from '../../domain/event';
 dayjs.extend(utc);
 
 export class ClickHouseStorage implements DataStorage {
-  private clickHouse: ClickHouseClient;
+  private readonly clickHouse: ClickHouseClient;
 
   private cron: CronJob;
 
@@ -23,11 +23,11 @@ export class ClickHouseStorage implements DataStorage {
   constructor(clickHouse: ClickHouseClient) {
     this.clickHouse = clickHouse;
     this.localEvents = [];
-    this.cron = new CronJob(process.env.CRON_INSERT_PATTERN || '* * * * * *', () => this.bulkInsert(), null);
+    this.cron = new CronJob(process.env.CRON_INSERT_PATTERN || '* * * * * *', () => this.batchInsert(), null);
     this.cron.start();
   }
 
-  async bulkInsert() {
+  async batchInsert() {
     if (this.clickHouse !== undefined) {
       this.clickHouse.insert({
         table: 'events',
