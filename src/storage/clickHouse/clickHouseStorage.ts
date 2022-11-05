@@ -23,6 +23,7 @@ export class ClickHouseStorage implements DataStorage {
     for (let i = 0; i < files.length; i++) {
       const file = files[i];
       const migrationFile = path.join(dir, file);
+
       console.info(`Migration ${migrationFile}`);
       const migrationFileContent = fs.readFileSync(migrationFile, { encoding: 'utf8' });
       await this.clickHouse.exec({
@@ -64,10 +65,14 @@ export class ClickHouseStorage implements DataStorage {
   }
 
   async getEvents(search: SearchForEventsType): Promise<Event[]> {
-    let query = 'SELECT * FROM events WHERE app_id={appIdParam: UUID} AND created_at >= {dateFromParam: DATETIME}';
+    let query = 'SELECT * FROM events WHERE app_id={appIdParam: INT} AND created_at >= {dateFromParam: DATETIME}';
 
     if (search.dateTo) {
       query += ' AND created_at <= {dateToParam: DATETIME}';
+    }
+
+    if (search.pathname) {
+      query += ' AND pathname = {pathnameParam: VARCHAR}';
     }
 
     if (search.type) {
@@ -76,6 +81,15 @@ export class ClickHouseStorage implements DataStorage {
 
     query += ' LIMIT {limitParam: INT}';
 
+    console.log(search.dateFrom, {
+      appIdParam: search.appId,
+      dateFromParam: dayjs(search.dateFrom).format('YYYY-MM-DD HH:mm:ss'),
+      dateToParam: search.dateTo ? dayjs(search.dateTo).format('YYYY-MM-DD HH:mm:ss') : '',
+      typeParam: search.type || '',
+      pathnameParam: search.pathname || '',
+      limitParam: search.limit || 100,
+    });
+
     const events = await this.clickHouse.query({
       query,
       query_params: {
@@ -83,6 +97,7 @@ export class ClickHouseStorage implements DataStorage {
         dateFromParam: dayjs(search.dateFrom).format('YYYY-MM-DD HH:mm:ss'),
         dateToParam: search.dateTo ? dayjs(search.dateTo).format('YYYY-MM-DD HH:mm:ss') : '',
         typeParam: search.type || '',
+        pathnameParam: search.pathname || '',
         limitParam: search.limit || 100,
       },
       format: 'JSONEachRow',

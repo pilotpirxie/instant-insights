@@ -9,10 +9,11 @@ export type AddEventType = {
 };
 
 export type SearchForEventsType = {
-  appId: string,
-  dateFrom: Date,
-  limit: number,
+  appId: number,
   type?: string,
+  pathname?: string,
+  limit: number,
+  dateFrom: Date,
   dateTo?: Date
 }
 
