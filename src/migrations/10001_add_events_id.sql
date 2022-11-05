@@ -1,0 +1,1 @@
+ALTER TABLE insights.events ADD COLUMN IF NOT EXISTS id UUID DEFAULT generateUUIDv4();
