@@ -85,5 +85,51 @@ export function initializeEventsController(dataStorage: DataStorage): Router {
     }
   });
 
+  const getPathnamesSchema = {
+    query: {
+      dateFrom: Joi.string().required(),
+      dateTo: Joi.string(),
+    },
+  };
+
+  router.get('/pathnames', validation(getPathnamesSchema), async (req: TypedRequest<typeof getPathnamesSchema>, res, next) => {
+    try {
+      const {
+        dateTo, dateFrom,
+      } = req.query;
+
+      const events = await dataStorage.getPathnames({
+        dateFrom: dayjs(dateFrom).utc().toDate(),
+        dateTo: dayjs(dateTo).utc().toDate(),
+      });
+      return res.json(events);
+    } catch (e) {
+      return next(e);
+    }
+  });
+
+  const getTypesSchema = {
+    query: {
+      dateFrom: Joi.string().required(),
+      dateTo: Joi.string(),
+    },
+  };
+
+  router.get('/types', validation(getTypesSchema), async (req: TypedRequest<typeof getTypesSchema>, res, next) => {
+    try {
+      const {
+        dateTo, dateFrom,
+      } = req.query;
+
+      const events = await dataStorage.getTypes({
+        dateFrom: dayjs(dateFrom).utc().toDate(),
+        dateTo: dayjs(dateTo).utc().toDate(),
+      });
+      return res.json(events);
+    } catch (e) {
+      return next(e);
+    }
+  });
+
   return router;
 }

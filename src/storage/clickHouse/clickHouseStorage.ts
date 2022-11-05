@@ -6,7 +6,7 @@ import dayjs from 'dayjs';
 import utc from 'dayjs/plugin/utc';
 import { CronJob } from 'cron';
 import {
-  AddEventType, CountOnlineType, DataStorage, SearchForEventsType,
+  AddEvent, CountOnline, DataStorage, SearchForEvents, Timespan,
 } from '../dataStorage';
 import { EventEntity } from './entities';
 import { Event } from '../../domain/event';
@@ -62,13 +62,15 @@ export class ClickHouseStorage implements DataStorage {
     }
   }
 
-  async addEvent(event: AddEventType): Promise<void> {
+  async addEvent({
+    type, params, meta, fingerprint, pathname,
+  }: AddEvent): Promise<void> {
     this.localEvents.push({
-      pathname: event.pathname,
-      fingerprint: event.fingerprint,
-      type: event.type,
-      meta: event.meta,
-      params: event.params,
+      pathname,
+      fingerprint,
+      type,
+      meta,
+      params,
       created_at: dayjs().utc().format('YYYY-MM-DD HH:mm:ss'),
     });
     return Promise.resolve();
@@ -76,7 +78,7 @@ export class ClickHouseStorage implements DataStorage {
 
   async getEvents({
     pathname, type, fingerprint, dateFrom, dateTo, limit,
-  }: SearchForEventsType): Promise<Event[]> {
+  }: SearchForEvents): Promise<Event[]> {
     let query = 'SELECT * FROM events WHERE created_at >= {dateFrom: DATETIME}';
 
     if (dateTo) {
@@ -115,7 +117,7 @@ export class ClickHouseStorage implements DataStorage {
     return Promise.resolve(events);
   }
 
-  async countOnline({ pathname }: CountOnlineType): Promise<number> {
+  async countOnline({ pathname }: CountOnline): Promise<number> {
     const onlineTimespan = Number(process.env.ONLINE_TIMESPAN || 5);
 
     let subquery = 'SELECT DISTINCT(fingerprint) fingerprint FROM insights.events WHERE (created_at > now() - INTERVAL {onlineTimespan: INT} MINUTE)';
@@ -139,5 +141,45 @@ export class ClickHouseStorage implements DataStorage {
     const online = Number(parsedResponse[0].online);
     console.info('Found', online, 'online users in the last', onlineTimespan, 'minutes');
     return Promise.resolve(online);
+  }
+
+  async getPathnames({ dateTo, dateFrom }: Timespan): Promise<string[]> {
+    let query = 'SELECT DISTINCT(pathname) pathname FROM insights.events WHERE created_at >= {dateFrom: DATETIME}';
+
+    if (dateTo) {
+      query += ' AND created_at <= {dateTo: DATETIME}';
+    }
+
+    const response = await this.clickHouse.query({
+      query,
+      query_params: {
+        dateTo: dateTo ? dayjs(dateTo).utc().format('YYYY-MM-DD HH:mm:ss') : '',
+        dateFrom,
+      },
+      format: 'JSONEachRow',
+    });
+
+    const parsedResponse = await response.json() as {pathname: string}[];
+    return Promise.resolve(parsedResponse.map((row) => row.pathname));
+  }
+
+  async getTypes({ dateTo, dateFrom }: Timespan): Promise<string[]> {
+    let query = 'SELECT DISTINCT(type) type FROM insights.events WHERE created_at >= {dateFrom: DATETIME}';
+
+    if (dateTo) {
+      query += ' AND created_at <= {dateTo: DATETIME}';
+    }
+
+    const response = await this.clickHouse.query({
+      query,
+      query_params: {
+        dateTo: dateTo ? dayjs(dateTo).utc().format('YYYY-MM-DD HH:mm:ss') : '',
+        dateFrom,
+      },
+      format: 'JSONEachRow',
+    });
+
+    const parsedResponse = await response.json() as {type: string}[];
+    return Promise.resolve(parsedResponse.map((row) => row.type));
   }
 }

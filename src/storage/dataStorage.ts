@@ -1,6 +1,6 @@
 import { Event } from '../domain/event';
 
-export type AddEventType = {
+export type AddEvent = {
   pathname: string,
   fingerprint: string,
   type: string,
@@ -8,7 +8,7 @@ export type AddEventType = {
   params: { [p: string]: string },
 };
 
-export type SearchForEventsType = {
+export type SearchForEvents = {
   type?: string,
   pathname?: string,
   limit: number,
@@ -17,12 +17,19 @@ export type SearchForEventsType = {
   fingerprint?: string
 }
 
-export type CountOnlineType = {
+export type Timespan = {
+  dateFrom: Date,
+  dateTo?: Date
+}
+
+export type CountOnline = {
   pathname?: string,
 }
 
 export interface DataStorage {
-  addEvent(event: AddEventType): Promise<void>;
-  getEvents(search: SearchForEventsType): Promise<Event[]>;
-  countOnline(online: CountOnlineType): Promise<number>;
+  addEvent(event: AddEvent): Promise<void>;
+  getEvents(search: SearchForEvents): Promise<Event[]>;
+  getPathnames(search: Timespan): Promise<string[]>;
+  getTypes(search: Timespan): Promise<string[]>;
+  countOnline(online: CountOnline): Promise<number>;
 }

@@ -17,3 +17,14 @@ MAX_EVENT_SIZE=1KB
 ONLINE_TIMESPAN=5
 API_WRITE_TOKEN=1a2acdb9-b51e-4658-ab8e-c015a464362b
 ```
+
+### API
+
+```shell
+POST /api/events
+GET /api/events
+GET /api/events/pathnames
+GET /api/events/types
+GET /api/online
+GET /api/stats
+```
