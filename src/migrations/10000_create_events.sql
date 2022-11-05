@@ -1,4 +1,4 @@
-CREATE TABLE IF NOT EXISTS insights.events
+CREATE TABLE IF NOT EXISTS events
 (
     type       VARCHAR,
     pathname       VARCHAR,

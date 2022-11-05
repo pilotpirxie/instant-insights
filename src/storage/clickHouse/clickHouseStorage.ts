@@ -62,6 +62,14 @@ export class ClickHouseStorage implements DataStorage {
         query: migrationFileContent,
       });
     }
+
+    if (process.env.BACKUP_S3_ENABLE === '1') {
+      this.clickHouse.exec({
+        query: `BACKUP DATABASE ${process.env.CLICKHOUSE_NAME} TO S3('${process.env.BACKUP_S3_URL}', '${process.env.BACKUP_S3_ACCESS_KEY}', '${process.env.BACKUP_S3_SECRET_KEY}');`,
+      }).catch((err) => {
+        console.error('Attempt to run backup failed', err);
+      });
+    }
   }
 
   async addEvent({
