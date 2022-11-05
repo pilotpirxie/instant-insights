@@ -1,6 +1,5 @@
 CREATE TABLE IF NOT EXISTS insights.events
 (
-    app_id     INT,
     type       VARCHAR,
     pathname       VARCHAR,
     fingerprint       VARCHAR,

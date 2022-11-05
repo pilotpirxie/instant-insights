@@ -39,7 +39,6 @@ export class ClickHouseStorage implements DataStorage {
 
   async addEvent(event: AddEventType): Promise<void> {
     this.localEvents.push({
-      app_id: event.appId,
       pathname: event.pathname,
       fingerprint: event.fingerprint,
       type: event.type,
@@ -61,7 +60,7 @@ export class ClickHouseStorage implements DataStorage {
         return Promise.resolve();
       }).catch((err) => {
         console.error('Failed to insert', batchInsertMax, 'events');
-        if (process.env.DROP_EVENTS_ON_INSERT_ERROR === '1') {
+        if (process.env.DISCARD_EVENTS_ON_INSERT_ERROR === '1') {
           this.localEvents = [];
         }
         return Promise.reject(err);
@@ -71,9 +70,9 @@ export class ClickHouseStorage implements DataStorage {
   }
 
   async getEvents({
-    pathname, appId, type, fingerprint, dateFrom, dateTo, limit,
+    pathname, type, fingerprint, dateFrom, dateTo, limit,
   }: SearchForEventsType): Promise<Event[]> {
-    let query = 'SELECT * FROM events WHERE app_id={appId: INT} AND created_at >= {dateFrom: DATETIME}';
+    let query = 'SELECT * FROM events WHERE created_at >= {dateFrom: DATETIME}';
 
     if (dateTo) {
       query += ' AND created_at <= {dateTo: DATETIME}';
@@ -96,7 +95,6 @@ export class ClickHouseStorage implements DataStorage {
     const response = await this.clickHouse.query({
       query,
       query_params: {
-        appId,
         dateFrom: dayjs(dateFrom).utc().format('YYYY-MM-DD HH:mm:ss'),
         dateTo: dateTo ? dayjs(dateTo).utc().format('YYYY-MM-DD HH:mm:ss') : '',
         typeParam: type || '',
@@ -112,14 +110,10 @@ export class ClickHouseStorage implements DataStorage {
     return Promise.resolve(events);
   }
 
-  async countOnline({ pathname, appId }: CountOnlineType): Promise<number> {
+  async countOnline({ pathname }: CountOnlineType): Promise<number> {
     const onlineTimespan = Number(process.env.ONLINE_TIMESPAN || 5);
 
     let subquery = 'SELECT DISTINCT(fingerprint) fingerprint FROM insights.events WHERE (created_at > now() - INTERVAL {onlineTimespan: INT} MINUTE)';
-
-    if (appId) {
-      subquery += ' AND app_id={appId: INT}';
-    }
 
     if (pathname) {
       subquery += ' AND pathname={pathname: VARCHAR}';
@@ -132,7 +126,6 @@ export class ClickHouseStorage implements DataStorage {
       query_params: {
         onlineTimespan,
         pathname: pathname || '',
-        appId,
       },
       format: 'JSONEachRow',
     });

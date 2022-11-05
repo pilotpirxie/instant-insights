@@ -1,5 +1,4 @@
 export type Event = {
-  appId: number,
   type: string,
   pathname: string,
   fingerprint: string,

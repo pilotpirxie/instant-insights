@@ -14,7 +14,6 @@ export function initializeEventsController(dataStorage: DataStorage): Router {
 
   const addEventSchema = {
     body: {
-      appId: Joi.number().required(),
       type: Joi.string().required(),
       pathname: Joi.string().required(),
       fingerprint: Joi.string().required(),
@@ -31,11 +30,10 @@ export function initializeEventsController(dataStorage: DataStorage): Router {
   router.post('/', validation(addEventSchema), async (req: TypedRequest<typeof addEventSchema>, res, next) => {
     try {
       const {
-        appId, pathname, type, params, meta, fingerprint,
+        pathname, type, params, meta, fingerprint,
       } = req.body;
 
       dataStorage.addEvent({
-        appId,
         pathname,
         params,
         meta,
@@ -52,7 +50,6 @@ export function initializeEventsController(dataStorage: DataStorage): Router {
 
   const getEventSchema = {
     query: {
-      appId: Joi.number().required(),
       type: Joi.string(),
       pathname: Joi.string(),
       fingerprint: Joi.string(),
@@ -65,12 +62,11 @@ export function initializeEventsController(dataStorage: DataStorage): Router {
   router.get('/', validation(getEventSchema), async (req: TypedRequest<typeof getEventSchema>, res, next) => {
     try {
       const {
-        pathname, type, appId, limit, dateFrom, dateTo, fingerprint,
+        pathname, type, limit, dateFrom, dateTo, fingerprint,
       } = req.query;
 
       const events = await dataStorage.getEvents({
         pathname,
-        appId,
         limit,
         type,
         fingerprint,

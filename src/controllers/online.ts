@@ -14,7 +14,6 @@ export function initializeOnlineController(dataStorage: DataStorage): Router {
 
   const getOnlineSchema = {
     query: {
-      appId: Joi.number().required(),
       pathname: Joi.string(),
     },
   };
@@ -22,12 +21,11 @@ export function initializeOnlineController(dataStorage: DataStorage): Router {
   router.get('/', validation(getOnlineSchema), async (req: TypedRequest<typeof getOnlineSchema>, res, next) => {
     try {
       const {
-        pathname, appId,
+        pathname,
       } = req.query;
 
       const online = await dataStorage.countOnline({
         pathname,
-        appId,
       });
       return res.json({ online });
     } catch (e) {

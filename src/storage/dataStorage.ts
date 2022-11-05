@@ -1,7 +1,6 @@
 import { Event } from '../domain/event';
 
 export type AddEventType = {
-  appId: number,
   pathname: string,
   fingerprint: string,
   type: string,
@@ -10,7 +9,6 @@ export type AddEventType = {
 };
 
 export type SearchForEventsType = {
-  appId: number,
   type?: string,
   pathname?: string,
   limit: number,
@@ -20,7 +18,6 @@ export type SearchForEventsType = {
 }
 
 export type CountOnlineType = {
-  appId: number,
   pathname?: string,
 }
 
