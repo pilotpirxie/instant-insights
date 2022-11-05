@@ -28,13 +28,13 @@ export class ClickHouseStorage implements DataStorage {
   }
 
   async batchInsert() {
-    if (this.clickHouse !== undefined) {
+    if (this.clickHouse !== undefined && this.localEvents.length > 0) {
       this.clickHouse.insert({
         table: 'events',
         values: [...this.localEvents],
         format: 'JSONEachRow',
       }).then(() => {
-        console.info(Date.now(), 'Inserted batch of', this.localEvents.length, 'events');
+        console.info('Inserted batch of', this.localEvents.length, 'events');
         this.localEvents = [];
         return Promise.resolve();
       }).catch((err) => {
