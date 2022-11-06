@@ -18,25 +18,34 @@ dayjs.extend(utc);
 export class ClickHouseStorage implements DataStorage {
   private readonly clickHouse: ClickHouseClient;
 
-  private cron: CronJob;
+  private insertCron: CronJob;
+
+  private backupCron: CronJob;
 
   private localEvents: EventEntity[];
 
   constructor(clickHouse: ClickHouseClient) {
     this.clickHouse = clickHouse;
     this.localEvents = [];
-    this.cron = new CronJob(process.env.CRON_INSERT_PATTERN || '* * * * * *', () => this.batchInsert(), null);
-    this.cron.start();
+    this.insertCron = new CronJob(process.env.CRON_INSERT_PATTERN || '* * * * * *', () => this.batchInsert(), null);
+    this.insertCron.start();
+
+    if (process.env.BACKUP_S3_ENABLE === '1') {
+      this.backupCron = new CronJob(process.env.BACKUP_CRON_PATTERN || '0 0 */1 * *', () => this.backup(), null);
+      this.backupCron.start();
+      const nextBackupDates = this.backupCron.nextDates();
+      console.info('Next backup run at', nextBackupDates.toFormat('yyyy-MM-dd HH:mm:ss'));
+    }
   }
 
-  async batchInsert() {
+  async batchInsert(): Promise<void> {
     if (this.clickHouse !== undefined && this.localEvents.length > 0) {
       this.clickHouse.insert({
         table: 'events',
         values: [...this.localEvents],
         format: 'JSONEachRow',
       }).then(() => {
-        console.info('Inserted batch of', this.localEvents.length, 'events');
+        console.info('Batch insert of', this.localEvents.length, 'events finished');
         this.localEvents = [];
         return Promise.resolve();
       }).catch((err) => {
@@ -49,6 +58,17 @@ export class ClickHouseStorage implements DataStorage {
     }
   }
 
+  async backup(): Promise<void> {
+    console.info('Backup to S3 started');
+    this.clickHouse.exec({
+      query: `BACKUP DATABASE ${process.env.CLICKHOUSE_NAME} TO S3('${process.env.BACKUP_S3_URL}/${Date.now()}', '${process.env.BACKUP_S3_ACCESS_KEY}', '${process.env.BACKUP_S3_SECRET_KEY}');`,
+    }).then(() => {
+      console.info('Backup to S3 finished');
+    }).catch((err) => {
+      console.error('Backup to S3 failed', err);
+    });
+  }
+
   async migrate(dir: string): Promise<void> {
     const files = fs.readdirSync(dir);
     files.sort((a, b) => Number(a.split('_')[0]) - Number(b.split('_')[0]));
@@ -56,18 +76,10 @@ export class ClickHouseStorage implements DataStorage {
       const file = files[i];
       const migrationFile = path.join(dir, file);
 
-      console.info(`Migration ${migrationFile}`);
+      console.info(`Migrating ${migrationFile}`);
       const migrationFileContent = fs.readFileSync(migrationFile, { encoding: 'utf8' });
       await this.clickHouse.exec({
         query: migrationFileContent,
-      });
-    }
-
-    if (process.env.BACKUP_S3_ENABLE === '1') {
-      this.clickHouse.exec({
-        query: `BACKUP DATABASE ${process.env.CLICKHOUSE_NAME} TO S3('${process.env.BACKUP_S3_URL}/base', '${process.env.BACKUP_S3_ACCESS_KEY}', '${process.env.BACKUP_S3_SECRET_KEY}') SETTINGS base_backup = S3('${process.env.BACKUP_S3_URL}/incremental', '${process.env.BACKUP_S3_ACCESS_KEY}', '${process.env.BACKUP_S3_SECRET_KEY}');`,
-      }).catch((err) => {
-        console.error('Attempt to run backup failed', err);
       });
     }
   }
