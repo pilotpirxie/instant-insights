@@ -59,10 +59,11 @@ export class ClickHouseStorage implements DataStorage {
   }
 
   async backup(): Promise<void> {
+    const s3Destination = `${process.env.BACKUP_S3_URL}/${dayjs().format('YYYY_MM_DD_HH_mm_ss')}`;
     const backupStartTime = performance.now();
-    console.info('Backup to S3 started');
+    console.info('Backup to S3 started', s3Destination);
     this.clickHouse.exec({
-      query: `BACKUP DATABASE ${process.env.CLICKHOUSE_NAME} TO S3('${process.env.BACKUP_S3_URL}/${Date.now()}', '${process.env.BACKUP_S3_ACCESS_KEY}', '${process.env.BACKUP_S3_SECRET_KEY}');`,
+      query: `BACKUP DATABASE ${process.env.CLICKHOUSE_NAME} TO S3('${s3Destination}', '${process.env.BACKUP_S3_ACCESS_KEY}', '${process.env.BACKUP_S3_SECRET_KEY}');`,
     }).then(() => {
       const backupFinishTime = performance.now();
       console.info('Backup to S3 finished in', backupFinishTime - backupStartTime, 'ms');
