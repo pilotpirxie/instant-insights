@@ -129,7 +129,7 @@ export class ClickHouseStorage implements DataStorage {
       query_params: {
         dateFrom: dayjs(dateFrom).utc().format('YYYY-MM-DD HH:mm:ss'),
         dateTo: dateTo ? dayjs(dateTo).utc().format('YYYY-MM-DD HH:mm:ss') : '',
-        typeParam: type || '',
+        type: type || '',
         pathname: pathname || '',
         limit: limit || 100,
         fingerprint: fingerprint || '',
