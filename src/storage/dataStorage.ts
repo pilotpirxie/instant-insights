@@ -29,6 +29,8 @@ export type CountOnline = {
 }
 
 export interface DataStorage {
+  migrate(dir: string): Promise<void>;
+  backup(): Promise<void>;
   addEvent(event: AddEvent): Promise<void>;
   getEvents(search: SearchForEvents): Promise<Event[]>;
   getPathnames(search: Timespan): Promise<Pathname[]>;

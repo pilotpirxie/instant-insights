@@ -22,7 +22,20 @@ const clickHouseClient = createClient({
   max_open_connections: Number(process.env.CLICKHOUSE_MAX_OPEN_CONNECTIONS || Infinity),
 });
 
-const clickHouseStorage = new ClickHouseStorage(clickHouseClient);
+const clickHouseStorage = new ClickHouseStorage({
+  clickHouse: clickHouseClient,
+  onlineTimespan: Number(process.env.ONLINE_TIMESPAN || 5),
+  discardEventsOnInsertError: process.env.DISCARD_EVENTS_ON_INSERT_ERROR === 'true',
+  cronInsertPattern: process.env.CRON_INSERT_PATTERN || '* * * * * *',
+  backupToS3: {
+    secretKey: process.env.BACKUP_TO_S3_SECRET_KEY || '',
+    accessKey: process.env.BACKUP_TO_S3_ACCESS_KEY || '',
+    s3Url: process.env.BACKUP_TO_S3_URL || '',
+    cronPattern: process.env.BACKUP_TO_S3_CRON_PATTERN || '0 0 */1 * *',
+    enable: process.env.BACKUP_TO_S3_ENABLE === 'true',
+    databaseToBackup: process.env.CLICKHOUSE_NAME || '',
+  },
+});
 
 clickHouseStorage.migrate(path.join(__dirname, 'migrations')).then(() => {
   console.info('Migration has been completed');

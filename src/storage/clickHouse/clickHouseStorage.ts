@@ -15,32 +15,51 @@ import { Type } from '../../domain/type';
 
 dayjs.extend(utc);
 
+export type ClickHouseStorageConfig = {
+  clickHouse: ClickHouseClient,
+  cronInsertPattern: string,
+  discardEventsOnInsertError: boolean,
+  onlineTimespan: number,
+  backupToS3: {
+    databaseToBackup: string,
+    enable: boolean,
+    cronPattern: string,
+    s3Url: string,
+    secretKey: string,
+    accessKey: string,
+  },
+}
+
 export class ClickHouseStorage implements DataStorage {
-  private readonly clickHouse: ClickHouseClient;
-
-  private insertCron: CronJob;
-
-  private backupCron: CronJob;
+  private storageConfig: ClickHouseStorageConfig;
 
   private localEvents: EventEntity[];
 
-  constructor(clickHouse: ClickHouseClient) {
-    this.clickHouse = clickHouse;
+  constructor(storageConfig: ClickHouseStorageConfig) {
+    this.storageConfig = storageConfig;
     this.localEvents = [];
-    this.insertCron = new CronJob(process.env.CRON_INSERT_PATTERN || '* * * * * *', () => this.batchInsert(), null);
-    this.insertCron.start();
+    const insertCron = new CronJob(
+      this.storageConfig.cronInsertPattern,
+      () => this.batchInsert(),
+      null,
+    );
+    insertCron.start();
 
-    if (process.env.BACKUP_S3_ENABLE === '1') {
-      this.backupCron = new CronJob(process.env.BACKUP_CRON_PATTERN || '0 0 */1 * *', () => this.backup(), null);
-      this.backupCron.start();
-      const nextBackupDates = this.backupCron.nextDates();
+    if (this.storageConfig.backupToS3.enable) {
+      const backupCron = new CronJob(
+        this.storageConfig.backupToS3.cronPattern,
+        () => this.backup(),
+        null,
+      );
+      backupCron.start();
+      const nextBackupDates = backupCron.nextDates();
       console.info('Next backup run at', nextBackupDates.toFormat('yyyy-MM-dd HH:mm:ss'));
     }
   }
 
   async batchInsert(): Promise<void> {
-    if (this.clickHouse !== undefined && this.localEvents.length > 0) {
-      this.clickHouse.insert({
+    if (this.storageConfig.clickHouse !== undefined && this.localEvents.length > 0) {
+      this.storageConfig.clickHouse.insert({
         table: 'events',
         values: [...this.localEvents],
         format: 'JSONEachRow',
@@ -50,7 +69,7 @@ export class ClickHouseStorage implements DataStorage {
         return Promise.resolve();
       }).catch((err) => {
         console.error('Failed to insert', this.localEvents.length, 'events');
-        if (process.env.DISCARD_EVENTS_ON_INSERT_ERROR === '1') {
+        if (this.storageConfig.discardEventsOnInsertError) {
           this.localEvents = [];
         }
         return Promise.reject(err);
@@ -59,11 +78,11 @@ export class ClickHouseStorage implements DataStorage {
   }
 
   async backup(): Promise<void> {
-    const s3Destination = `${process.env.BACKUP_S3_URL}/${dayjs().format('YYYY_MM_DD_HH_mm_ss')}`;
+    const s3Destination = `${this.storageConfig.backupToS3.s3Url}/${dayjs().format('YYYY_MM_DD_HH_mm_ss')}`;
     const backupStartTime = performance.now();
     console.info('Backup to S3 started', s3Destination);
-    this.clickHouse.exec({
-      query: `BACKUP DATABASE ${process.env.CLICKHOUSE_NAME} TO S3('${s3Destination}', '${process.env.BACKUP_S3_ACCESS_KEY}', '${process.env.BACKUP_S3_SECRET_KEY}');`,
+    this.storageConfig.clickHouse.exec({
+      query: `BACKUP DATABASE ${this.storageConfig.backupToS3.databaseToBackup} TO S3('${s3Destination}', '${this.storageConfig.backupToS3.accessKey}', '${this.storageConfig.backupToS3.secretKey}');`,
     }).then(() => {
       const backupFinishTime = performance.now();
       console.info('Backup to S3 finished in', backupFinishTime - backupStartTime, 'ms');
@@ -81,7 +100,7 @@ export class ClickHouseStorage implements DataStorage {
 
       console.info(`Migrating ${migrationFile}`);
       const migrationFileContent = fs.readFileSync(migrationFile, { encoding: 'utf8' });
-      await this.clickHouse.exec({
+      await this.storageConfig.clickHouse.exec({
         query: migrationFileContent,
       });
     }
@@ -124,7 +143,7 @@ export class ClickHouseStorage implements DataStorage {
 
     query += ' ORDER BY created_at DESC LIMIT {limit: INT}';
 
-    const response = await this.clickHouse.query({
+    const response = await this.storageConfig.clickHouse.query({
       query,
       query_params: {
         dateFrom: dayjs(dateFrom).utc().format('YYYY-MM-DD HH:mm:ss'),
@@ -143,18 +162,16 @@ export class ClickHouseStorage implements DataStorage {
   }
 
   async countOnline({ pathname }: CountOnline): Promise<number> {
-    const onlineTimespan = Number(process.env.ONLINE_TIMESPAN || 5);
-
     let query = 'SELECT COUNT(DISTINCT fingerprint) as online FROM events WHERE (created_at > now() - INTERVAL {onlineTimespan: INT} MINUTE)';
 
     if (pathname) {
       query += ' AND pathname={pathname: VARCHAR}';
     }
 
-    const response = await this.clickHouse.query({
+    const response = await this.storageConfig.clickHouse.query({
       query,
       query_params: {
-        onlineTimespan,
+        onlineTimespan: this.storageConfig.onlineTimespan,
         pathname: pathname || '',
       },
       format: 'JSONEachRow',
@@ -162,7 +179,7 @@ export class ClickHouseStorage implements DataStorage {
 
     const parsedResponse = await response.json() as {online: number}[];
     const online = Number(parsedResponse[0].online);
-    console.info('Found', online, 'online users in the last', onlineTimespan, 'minutes');
+    console.info('Found', online, 'online users in the last', this.storageConfig.onlineTimespan, 'minutes');
     return Promise.resolve(online);
   }
 
@@ -175,7 +192,7 @@ export class ClickHouseStorage implements DataStorage {
 
     query += ' GROUP BY pathname ORDER BY count DESC';
 
-    const response = await this.clickHouse.query({
+    const response = await this.storageConfig.clickHouse.query({
       query,
       query_params: {
         dateTo: dateTo ? dayjs(dateTo).utc().format('YYYY-MM-DD HH:mm:ss') : '',
@@ -197,7 +214,7 @@ export class ClickHouseStorage implements DataStorage {
 
     query += ' GROUP BY type ORDER BY count DESC';
 
-    const response = await this.clickHouse.query({
+    const response = await this.storageConfig.clickHouse.query({
       query,
       query_params: {
         dateTo: dateTo ? dayjs(dateTo).utc().format('YYYY-MM-DD HH:mm:ss') : '',
