@@ -32,3 +32,11 @@ GET /api/events/types
 GET /api/online
 GET /api/stats
 ```
+
+### High-level architecture
+![./img/diagram.png](./img/diagram.png)
+
+### License
+```shell
+LGPL-2.1
+```
