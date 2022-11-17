@@ -36,6 +36,12 @@ GET /api/stats
 ### High-level architecture
 ![./img/diagram.png](./img/diagram.png)
 
+### Restore data from backup
+```shell
+# https://clickhouse.com/docs/en/manage/backups/#restore-from-the-incremental-backup
+RESTORE TABLE insights.events FROM S3('https://BACKUP_S3_URL/BACKUP_DIRECTORY', 'BACKUP_S3_ACCESS_KEY', 'BACKUP_S3_SECRET_KEY');
+```
+
 ### License
 ```shell
 LGPL-2.1
