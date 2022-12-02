@@ -9,7 +9,11 @@ import { DataStorage } from '../storage/dataStorage';
 
 dayjs.extend(utc);
 
-export function initializeEventsController(dataStorage: DataStorage): Router {
+type controllerParams = {
+  dataStorage: DataStorage,
+}
+
+export function initializeEventsController({ dataStorage }: controllerParams): Router {
   const router = Router();
 
   const addEventSchema = {

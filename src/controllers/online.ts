@@ -1,4 +1,3 @@
-import 'dotenv';
 import { Router } from 'express';
 import Joi from 'joi';
 import dayjs from 'dayjs';
@@ -9,7 +8,11 @@ import { DataStorage } from '../storage/dataStorage';
 
 dayjs.extend(utc);
 
-export function initializeOnlineController(dataStorage: DataStorage): Router {
+type controllerParams = {
+  dataStorage: DataStorage,
+}
+
+export function initializeOnlineController({ dataStorage }: controllerParams): Router {
   const router = Router();
 
   const getOnlineSchema = {

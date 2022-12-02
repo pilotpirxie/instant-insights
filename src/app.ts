@@ -7,6 +7,7 @@ import { errorHandler } from './middlewares/errors';
 import { ClickHouseStorage } from './storage/clickHouse/clickHouseStorage';
 import { initializeEventsController } from './controllers/events';
 import { initializeOnlineController } from './controllers/online';
+import { initializeUsersController } from './controllers/users';
 
 dotenv.config();
 const port = process.env.PORT || 3000;
@@ -46,8 +47,14 @@ clickHouseStorage.migrate(path.join(__dirname, 'migrations')).then(() => {
 
 app.use(bodyParser.json({ limit: process.env.MAX_EVENT_SIZE || '1KB' }));
 
-app.use('/api/events', initializeEventsController(clickHouseStorage));
-app.use('/api/online', initializeOnlineController(clickHouseStorage));
+app.use('/api/events', initializeEventsController({ dataStorage: clickHouseStorage }));
+app.use('/api/online', initializeOnlineController({ dataStorage: clickHouseStorage }));
+app.use('/api/users', initializeUsersController({
+  dataStorage: clickHouseStorage,
+  jwtSecret: process.env.JWT_SECRET || '',
+  tokenExpiresIn: process.env.TOKEN_EXPIRES_IN || '1d',
+  refreshTokenExpiresIn: process.env.REFRESH_TOKEN_EXPIRES_IN || '7d',
+}));
 
 app.use(errorHandler);
 

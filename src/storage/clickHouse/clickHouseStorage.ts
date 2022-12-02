@@ -6,12 +6,13 @@ import dayjs from 'dayjs';
 import utc from 'dayjs/plugin/utc';
 import { CronJob } from 'cron';
 import {
-  AddEvent, CountOnline, DataStorage, SearchForEvents, Timespan,
+  AddEvent, CountOnline, DataStorage, GetUserByEmail, SearchForEvents, Timespan,
 } from '../dataStorage';
 import { EventEntity } from './entities';
 import { Event } from '../../domain/event';
 import { Pathname } from '../../domain/pathname';
 import { Type } from '../../domain/type';
+import { User } from '../../domain/user';
 
 dayjs.extend(utc);
 
@@ -55,6 +56,23 @@ export class ClickHouseStorage implements DataStorage {
       const nextBackupDates = backupCron.nextDates();
       console.info('Next backup run at', nextBackupDates.toFormat('yyyy-MM-dd HH:mm:ss'));
     }
+  }
+
+  async getUserByEmail(data: GetUserByEmail): Promise<User | null> {
+    const response = await this.storageConfig.clickHouse.query({
+      query: 'SELECT * FROM users WHERE email={email: VARCHAR}',
+      query_params: {
+        email: data.email,
+      },
+      format: 'JSONEachRow',
+    });
+
+    const parsedResponse = await response.json() as User[];
+    if (parsedResponse.length === 0) {
+      return Promise.resolve(null);
+    }
+
+    return Promise.resolve(parsedResponse[0]);
   }
 
   async batchInsert(): Promise<void> {

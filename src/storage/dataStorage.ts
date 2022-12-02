@@ -1,6 +1,7 @@
 import { Event } from '../domain/event';
 import { Type } from '../domain/type';
 import { Pathname } from '../domain/pathname';
+import { User } from '../domain/user';
 
 export type AddEvent = {
   pathname: string,
@@ -28,6 +29,10 @@ export type CountOnline = {
   pathname?: string,
 }
 
+export type GetUserByEmail = {
+  email: string,
+}
+
 export interface DataStorage {
   migrate(dir: string): Promise<void>;
   backup(): Promise<void>;
@@ -36,4 +41,6 @@ export interface DataStorage {
   getPathnames(search: Timespan): Promise<Pathname[]>;
   getTypes(search: Timespan): Promise<Type[]>;
   countOnline(online: CountOnline): Promise<number>;
+  countOnline(online: CountOnline): Promise<number>;
+  getUserByEmail(data: GetUserByEmail): Promise<User | null>;
 }
