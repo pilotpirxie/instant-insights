@@ -26,5 +26,6 @@ module.exports = {
     'no-plusplus': 'off',
     'class-methods-use-this': 'off',
     'no-await-in-loop': 'off',
+    'consistent-return': 'off',
   },
 };

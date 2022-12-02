@@ -33,6 +33,12 @@ export type GetUserByEmail = {
   email: string,
 }
 
+export type InsertUser = {
+  email: string,
+  passwordHash: string,
+  salt: string,
+}
+
 export interface DataStorage {
   migrate(dir: string): Promise<void>;
   backup(): Promise<void>;
@@ -43,4 +49,5 @@ export interface DataStorage {
   countOnline(online: CountOnline): Promise<number>;
   countOnline(online: CountOnline): Promise<number>;
   getUserByEmail(data: GetUserByEmail): Promise<User | null>;
+  insertUser(user: InsertUser): Promise<void>;
 }

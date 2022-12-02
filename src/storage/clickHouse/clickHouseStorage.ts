@@ -6,7 +6,13 @@ import dayjs from 'dayjs';
 import utc from 'dayjs/plugin/utc';
 import { CronJob } from 'cron';
 import {
-  AddEvent, CountOnline, DataStorage, GetUserByEmail, SearchForEvents, Timespan,
+  AddEvent,
+  CountOnline,
+  DataStorage,
+  GetUserByEmail,
+  InsertUser,
+  SearchForEvents,
+  Timespan,
 } from '../dataStorage';
 import { EventEntity } from './entities';
 import { Event } from '../../domain/event';
@@ -243,5 +249,24 @@ export class ClickHouseStorage implements DataStorage {
 
     const parsedResponse = await response.json() as Type[];
     return Promise.resolve(parsedResponse);
+  }
+
+  async insertUser(user: InsertUser): Promise<void> {
+    try {
+      await this.storageConfig.clickHouse.insert({
+        table: 'users',
+        values: [{
+          email: user.email,
+          password: user.passwordHash,
+          salt: user.salt,
+        }],
+        format: 'JSONEachRow',
+      });
+
+      return Promise.resolve();
+    } catch (err) {
+      console.error('Inserting events failed', err);
+      return Promise.reject(err);
+    }
   }
 }
