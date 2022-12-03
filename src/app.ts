@@ -14,6 +14,11 @@ dotenv.config();
 const port = process.env.PORT || 3000;
 const app: Express = express();
 
+app.use(express.static(path.join(__dirname, 'public')));
+app.get('(/*)?', async (req, res, next) => {
+  res.sendFile(path.join(__dirname, 'public', 'index.html'));
+});
+
 const clickHouseClient = createClient({
   host: process.env.CLICKHOUSE_URL || 'http://localhost:8123',
   username: process.env.CLICKHOUSE_USER || 'default',

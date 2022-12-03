@@ -229,7 +229,7 @@ export class ClickHouseStorage implements DataStorage {
       format: 'JSONEachRow',
     });
 
-    const parsedResponse = await response.json() as {online: number}[];
+    const parsedResponse = await response.json() as {online: string}[];
     const online = Number(parsedResponse[0].online);
     console.info('Found', online, 'online users in the last', this.storageConfig.onlineTimespan, 'minutes');
     return Promise.resolve(online);
@@ -332,7 +332,7 @@ export class ClickHouseStorage implements DataStorage {
       format: 'JSONEachRow',
     });
 
-    const parsedResponseOnline = await responseOnline.json() as {online: number}[];
+    const parsedResponseOnline = await responseOnline.json() as {online: string}[];
     const online = Number(parsedResponseOnline[0].online);
 
     const response24h = await this.storageConfig.clickHouse.query({
@@ -343,7 +343,7 @@ export class ClickHouseStorage implements DataStorage {
       format: 'JSONEachRow',
     });
 
-    const parsedResponse24h = await response24h.json() as {unique: number, events: number}[];
+    const parsedResponse24h = await response24h.json() as {unique: string, events: string}[];
     const unique = Number(parsedResponse24h[0].unique);
     const events = Number(parsedResponse24h[0].events);
 
@@ -393,7 +393,7 @@ export class ClickHouseStorage implements DataStorage {
       format: 'JSONEachRow',
     });
 
-    const parsedResponse = await response.json() as {count: number, date: string}[];
+    const parsedResponse = await response.json() as {count: string, date: string}[];
     const result: EventsExplorerData = {
       data: [],
       labels: [],
@@ -401,7 +401,7 @@ export class ClickHouseStorage implements DataStorage {
 
     parsedResponse.forEach((item) => {
       result.labels.push(item.date);
-      result.data.push(item.count);
+      result.data.push(Number(item.count));
     });
     return Promise.resolve(result);
   }
@@ -423,7 +423,7 @@ export class ClickHouseStorage implements DataStorage {
       format: 'JSONEachRow',
     });
 
-    const parsedResponse = await response.json() as {count: number, pathname: string}[];
+    const parsedResponse = await response.json() as {count: string, pathname: string}[];
     const result: EventsExplorerData = {
       data: [],
       labels: [],
@@ -431,7 +431,7 @@ export class ClickHouseStorage implements DataStorage {
 
     parsedResponse.forEach((item) => {
       result.labels.push(item.pathname);
-      result.data.push(item.count);
+      result.data.push(Number(item.count));
     });
     return Promise.resolve(result);
   }
@@ -479,7 +479,7 @@ export class ClickHouseStorage implements DataStorage {
       format: 'JSONEachRow',
     });
 
-    const parsedResponse = await response.json() as {count: number, date: string}[];
+    const parsedResponse = await response.json() as {count: string, date: string}[];
     const result: EventsExplorerData = {
       data: [],
       labels: [],
@@ -487,7 +487,7 @@ export class ClickHouseStorage implements DataStorage {
 
     parsedResponse.forEach((item) => {
       result.labels.push(item.date);
-      result.data.push(item.count);
+      result.data.push(Number(item.count));
     });
     return Promise.resolve(result);
   }
