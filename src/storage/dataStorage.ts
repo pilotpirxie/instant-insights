@@ -3,6 +3,7 @@ import { Type } from '../domain/type';
 import { Pathname } from '../domain/pathname';
 import { User } from '../domain/user';
 import { Session } from '../domain/session';
+import { Summary } from '../domain/summary';
 
 export type AddEvent = {
   pathname: string,
@@ -71,4 +72,5 @@ export interface DataStorage {
   addUser(user: AddUser): Promise<void>;
   getSessionByRefreshToken(data: GetSessionByRefreshToken): Promise<Session | null>;
   updateSession(data: UpdateSession): Promise<void>;
+  getSummary(): Promise<Summary>;
 }

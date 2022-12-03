@@ -23,6 +23,7 @@ import { Pathname } from '../../domain/pathname';
 import { Type } from '../../domain/type';
 import { User } from '../../domain/user';
 import { Session } from '../../domain/session';
+import { Summary } from '../../domain/summary';
 
 dayjs.extend(utc);
 
@@ -306,8 +307,8 @@ export class ClickHouseStorage implements DataStorage {
     return Promise.resolve(parsedResponse[0]);
   }
 
-  updateSession(data: UpdateSession): Promise<void> {
-    this.storageConfig.clickHouse.query({
+  async updateSession(data: UpdateSession): Promise<void> {
+    await this.storageConfig.clickHouse.query({
       query: 'ALTER TABLE sessions UPDATE refresh_token={refreshToken: VARCHAR}, expires_at={expiresAt: VARCHAR} WHERE id={id: VARCHAR}',
       query_params: {
         refreshToken: data.newRefreshToken,
@@ -317,5 +318,32 @@ export class ClickHouseStorage implements DataStorage {
     });
 
     return Promise.resolve();
+  }
+
+  async getSummary(): Promise<Summary> {
+    const responseOnline = await this.storageConfig.clickHouse.query({
+      query: 'SELECT COUNT(DISTINCT fingerprint) as online FROM events WHERE (created_at > now() - INTERVAL {onlineTimespan: INT} MINUTE)',
+      query_params: {
+        onlineTimespan: this.storageConfig.onlineTimespan,
+      },
+      format: 'JSONEachRow',
+    });
+
+    const parsedResponseOnline = await responseOnline.json() as {online: number}[];
+    const online = Number(parsedResponseOnline[0].online);
+
+    const response24h = await this.storageConfig.clickHouse.query({
+      query: 'SELECT COUNT(DISTINCT(fingerprint)) as unique, COUNT(id) as events FROM events WHERE created_at > NOW() - INTERVAL 1 DAY;',
+      query_params: {
+        onlineTimespan: this.storageConfig.onlineTimespan,
+      },
+      format: 'JSONEachRow',
+    });
+
+    const parsedResponse24h = await response24h.json() as {unique: number, events: number}[];
+    const unique = Number(parsedResponse24h[0].unique);
+    const events = Number(parsedResponse24h[0].events);
+
+    return Promise.resolve({ online, events, unique });
   }
 }

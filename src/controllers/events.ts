@@ -135,5 +135,16 @@ export function initializeEventsController({ dataStorage }: controllerParams): R
     }
   });
 
+  const getSummarySchema = {};
+
+  router.get('/summary', async (req: TypedRequest<typeof getSummarySchema>, res, next) => {
+    try {
+      const summary = await dataStorage.getSummary();
+      return res.json(summary);
+    } catch (e) {
+      return next(e);
+    }
+  });
+
   return router;
 }
