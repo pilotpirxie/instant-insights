@@ -11,15 +11,18 @@ import {
   AddUser,
   CountOnline,
   DataStorage,
+  GetSessionByRefreshToken,
   GetUserByEmail,
   SearchForEvents,
   Timespan,
+  UpdateSession,
 } from '../dataStorage';
 import { EventEntity } from './entities';
 import { Event } from '../../domain/event';
 import { Pathname } from '../../domain/pathname';
 import { Type } from '../../domain/type';
 import { User } from '../../domain/user';
+import { Session } from '../../domain/session';
 
 dayjs.extend(utc);
 
@@ -273,21 +276,46 @@ export class ClickHouseStorage implements DataStorage {
   }
 
   async addUser(user: AddUser): Promise<void> {
-    try {
-      await this.storageConfig.clickHouse.insert({
-        table: 'users',
-        values: [{
-          email: user.email,
-          password: user.passwordHash,
-          salt: user.salt,
-        }],
-        format: 'JSONEachRow',
-      });
+    await this.storageConfig.clickHouse.insert({
+      table: 'users',
+      values: [{
+        email: user.email,
+        password: user.passwordHash,
+        salt: user.salt,
+      }],
+      format: 'JSONEachRow',
+    });
 
-      return Promise.resolve();
-    } catch (err) {
-      console.error('Inserting user failed', err);
-      return Promise.reject(err);
+    return Promise.resolve();
+  }
+
+  async getSessionByRefreshToken(data: GetSessionByRefreshToken): Promise<Session | null> {
+    const response = await this.storageConfig.clickHouse.query({
+      query: 'SELECT * FROM sessions WHERE refresh_token={refreshToken: VARCHAR}',
+      query_params: {
+        refreshToken: data.refreshToken,
+      },
+      format: 'JSONEachRow',
+    });
+
+    const parsedResponse = await response.json() as Session[];
+    if (parsedResponse.length === 0) {
+      return Promise.resolve(null);
     }
+
+    return Promise.resolve(parsedResponse[0]);
+  }
+
+  updateSession(data: UpdateSession): Promise<void> {
+    this.storageConfig.clickHouse.query({
+      query: 'ALTER TABLE sessions UPDATE refresh_token={refreshToken: VARCHAR}, expires_at={expiresAt: VARCHAR} WHERE id={id: VARCHAR}',
+      query_params: {
+        refreshToken: data.newRefreshToken,
+        expiresAt: dayjs(data.expiresAt).utc().format('YYYY-MM-DD HH:mm:ss'),
+        id: data.id,
+      },
+    });
+
+    return Promise.resolve();
   }
 }

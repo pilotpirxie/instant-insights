@@ -2,6 +2,7 @@ import { Event } from '../domain/event';
 import { Type } from '../domain/type';
 import { Pathname } from '../domain/pathname';
 import { User } from '../domain/user';
+import { Session } from '../domain/session';
 
 export type AddEvent = {
   pathname: string,
@@ -46,6 +47,16 @@ export type AddSession = {
   ip: string,
 }
 
+export type GetSessionByRefreshToken = {
+  refreshToken: string,
+}
+
+export type UpdateSession = {
+  id: string,
+  expiresAt: Date,
+  newRefreshToken: string,
+}
+
 export interface DataStorage {
   migrate(dir: string): Promise<void>;
   backup(): Promise<void>;
@@ -58,4 +69,6 @@ export interface DataStorage {
   getUserByEmail(data: GetUserByEmail): Promise<User | null>;
   addSession(data: AddSession): Promise<void>;
   addUser(user: AddUser): Promise<void>;
+  getSessionByRefreshToken(data: GetSessionByRefreshToken): Promise<Session | null>;
+  updateSession(data: UpdateSession): Promise<void>;
 }

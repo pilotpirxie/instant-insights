@@ -74,5 +74,50 @@ export function initializeUsersController({
     }
   });
 
+  const refreshTokenSchema = {
+    body: {
+      refreshToken: Joi.string().required(),
+    },
+  };
+
+  router.post('/refresh-token', validation(refreshTokenSchema), async (req: TypedRequest<typeof refreshTokenSchema>, res, next) => {
+    try {
+      const { refreshToken } = req.body;
+      const session = await dataStorage.getSessionByRefreshToken({ refreshToken });
+
+      if (!session) {
+        return res.sendStatus(401);
+      }
+
+      const tokenExpiresAt = dayjs().add(tokenExpiresIn, 'seconds').unix() * 1000;
+      const refreshTokenExpiresAt = dayjs().add(refreshTokenExpiresIn, 'seconds').unix() * 1000;
+
+      const token = jwt.sign({ sub: session.userId }, jwtSecret, {
+        algorithm: 'HS256',
+        expiresIn: tokenExpiresIn,
+      });
+
+      const newRefreshToken = jwt.sign({ sub: session.userId }, jwtSecret, {
+        algorithm: 'HS256',
+        expiresIn: refreshTokenExpiresIn,
+      });
+
+      await dataStorage.updateSession({
+        id: session.id,
+        newRefreshToken,
+        expiresAt: dayjs(refreshTokenExpiresAt).utc().toDate(),
+      });
+
+      return res.json({
+        token,
+        refreshToken: newRefreshToken,
+        tokenExpiresAt,
+        refreshTokenExpiresAt,
+      });
+    } catch (e) {
+      return next(e);
+    }
+  });
+
   return router;
 }
