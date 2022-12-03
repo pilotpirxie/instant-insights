@@ -11,8 +11,10 @@ import {
   AddUser,
   CountOnline,
   DataStorage,
+  EventsExplorer,
   GetSessionByRefreshToken,
   GetUserByEmail,
+  PathnamesPopularity,
   SearchForEvents,
   Timespan,
   UpdateSession,
@@ -24,6 +26,7 @@ import { Type } from '../../domain/type';
 import { User } from '../../domain/user';
 import { Session } from '../../domain/session';
 import { Summary } from '../../domain/summary';
+import { EventsExplorerData } from '../../domain/eventsExplorerData';
 
 dayjs.extend(utc);
 
@@ -345,5 +348,147 @@ export class ClickHouseStorage implements DataStorage {
     const events = Number(parsedResponse24h[0].events);
 
     return Promise.resolve({ online, events, unique });
+  }
+
+  async getEventsCount(data: EventsExplorer): Promise<EventsExplorerData> {
+    let query = 'SELECT COUNT(id) as count, ';
+
+    if (data.interval === 'year') {
+      query += 'toStartOfYear(created_at) as date';
+    }
+
+    if (data.interval === 'month') {
+      query += 'toStartOfMonth(created_at) as date';
+    }
+
+    if (data.interval === 'week') {
+      query += 'toStartOfWeek(created_at) as date';
+    }
+
+    if (data.interval === 'day') {
+      query += 'toStartOfDay(created_at) as date';
+    }
+
+    if (data.interval === 'hour') {
+      query += 'toStartOfHour(created_at) as date';
+    }
+
+    if (data.interval === 'minute') {
+      query += 'toStartOfMinute(created_at) as date';
+    }
+
+    query += ' FROM events WHERE created_at >= {dateFrom: DATETIME}';
+
+    if (data.dateTo) {
+      query += ' AND created_at <= {dateTo: DATETIME}';
+    }
+
+    query += ' GROUP BY date ORDER BY date ASC';
+    const response = await this.storageConfig.clickHouse.query({
+      query,
+      query_params: {
+        dateTo: data.dateTo ? dayjs(data.dateTo).utc().format('YYYY-MM-DD HH:mm:ss') : '',
+        dateFrom: data.dateFrom,
+      },
+      format: 'JSONEachRow',
+    });
+
+    const parsedResponse = await response.json() as {count: number, date: string}[];
+    const result: EventsExplorerData = {
+      data: [],
+      labels: [],
+    };
+
+    parsedResponse.forEach((item) => {
+      result.labels.push(item.date);
+      result.data.push(item.count);
+    });
+    return Promise.resolve(result);
+  }
+
+  async getPathnamesPopularity(data: PathnamesPopularity): Promise<EventsExplorerData> {
+    let query = 'SELECT COUNT(id) as count, pathname FROM events WHERE created_at >= {dateFrom: DATETIME}';
+
+    if (data.dateTo) {
+      query += ' AND created_at <= {dateTo: DATETIME}';
+    }
+
+    query += ' GROUP BY pathname ORDER BY count DESC';
+    const response = await this.storageConfig.clickHouse.query({
+      query,
+      query_params: {
+        dateTo: data.dateTo ? dayjs(data.dateTo).utc().format('YYYY-MM-DD HH:mm:ss') : '',
+        dateFrom: data.dateFrom,
+      },
+      format: 'JSONEachRow',
+    });
+
+    const parsedResponse = await response.json() as {count: number, pathname: string}[];
+    const result: EventsExplorerData = {
+      data: [],
+      labels: [],
+    };
+
+    parsedResponse.forEach((item) => {
+      result.labels.push(item.pathname);
+      result.data.push(item.count);
+    });
+    return Promise.resolve(result);
+  }
+
+  async getUsersActivity(data: EventsExplorer): Promise<EventsExplorerData> {
+    let query = 'SELECT COUNT(DISTINCT fingerprint) as count, ';
+
+    if (data.interval === 'year') {
+      query += 'toStartOfYear(created_at) as date';
+    }
+
+    if (data.interval === 'month') {
+      query += 'toStartOfMonth(created_at) as date';
+    }
+
+    if (data.interval === 'week') {
+      query += 'toStartOfWeek(created_at) as date';
+    }
+
+    if (data.interval === 'day') {
+      query += 'toStartOfDay(created_at) as date';
+    }
+
+    if (data.interval === 'hour') {
+      query += 'toStartOfHour(created_at) as date';
+    }
+
+    if (data.interval === 'minute') {
+      query += 'toStartOfMinute(created_at) as date';
+    }
+
+    query += ' FROM events WHERE created_at >= {dateFrom: DATETIME}';
+
+    if (data.dateTo) {
+      query += ' AND created_at <= {dateTo: DATETIME}';
+    }
+
+    query += ' GROUP BY date ORDER BY date ASC';
+    const response = await this.storageConfig.clickHouse.query({
+      query,
+      query_params: {
+        dateTo: data.dateTo ? dayjs(data.dateTo).utc().format('YYYY-MM-DD HH:mm:ss') : '',
+        dateFrom: data.dateFrom,
+      },
+      format: 'JSONEachRow',
+    });
+
+    const parsedResponse = await response.json() as {count: number, date: string}[];
+    const result: EventsExplorerData = {
+      data: [],
+      labels: [],
+    };
+
+    parsedResponse.forEach((item) => {
+      result.labels.push(item.date);
+      result.data.push(item.count);
+    });
+    return Promise.resolve(result);
   }
 }

@@ -4,6 +4,7 @@ import { Pathname } from '../domain/pathname';
 import { User } from '../domain/user';
 import { Session } from '../domain/session';
 import { Summary } from '../domain/summary';
+import { EventsExplorerData } from '../domain/eventsExplorerData';
 
 export type AddEvent = {
   pathname: string,
@@ -58,6 +59,17 @@ export type UpdateSession = {
   newRefreshToken: string,
 }
 
+export type EventsExplorer = {
+  dateFrom: Date,
+  dateTo?: Date,
+  interval: string,
+}
+
+export type PathnamesPopularity = {
+  dateFrom: Date,
+  dateTo?: Date,
+}
+
 export interface DataStorage {
   migrate(dir: string): Promise<void>;
   backup(): Promise<void>;
@@ -73,4 +85,7 @@ export interface DataStorage {
   getSessionByRefreshToken(data: GetSessionByRefreshToken): Promise<Session | null>;
   updateSession(data: UpdateSession): Promise<void>;
   getSummary(): Promise<Summary>;
+  getUsersActivity(data: EventsExplorer): Promise<EventsExplorerData>;
+  getEventsCount(data: EventsExplorer): Promise<EventsExplorerData>;
+  getPathnamesPopularity(data: PathnamesPopularity): Promise<EventsExplorerData>;
 }

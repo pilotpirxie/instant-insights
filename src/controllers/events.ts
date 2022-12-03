@@ -89,29 +89,6 @@ export function initializeEventsController({ dataStorage }: controllerParams): R
     }
   });
 
-  const getPathnamesSchema = {
-    query: {
-      dateFrom: Joi.string().required(),
-      dateTo: Joi.string(),
-    },
-  };
-
-  router.get('/pathnames', validation(getPathnamesSchema), async (req: TypedRequest<typeof getPathnamesSchema>, res, next) => {
-    try {
-      const {
-        dateTo, dateFrom,
-      } = req.query;
-
-      const events = await dataStorage.getPathnames({
-        dateFrom: dayjs(dateFrom).utc().toDate(),
-        dateTo: dayjs(dateTo).utc().toDate(),
-      });
-      return res.json(events);
-    } catch (e) {
-      return next(e);
-    }
-  });
-
   const getTypesSchema = {
     query: {
       dateFrom: Joi.string().required(),
@@ -141,6 +118,68 @@ export function initializeEventsController({ dataStorage }: controllerParams): R
     try {
       const summary = await dataStorage.getSummary();
       return res.json(summary);
+    } catch (e) {
+      return next(e);
+    }
+  });
+
+  const eventsExplorerSchema = {
+    query: {
+      dateFrom: Joi.string().required(),
+      dateTo: Joi.string(),
+      interval: Joi.string().allow('minute', 'hour', 'day', 'week', 'month', 'year').required(),
+    },
+  };
+
+  router.get('/activity', async (req: TypedRequest<typeof eventsExplorerSchema>, res, next) => {
+    try {
+      if (req.query.interval === 'minute' && dayjs(req.query.dateTo).diff(dayjs(req.query.dateFrom), 'day') > 7) {
+        return res.status(400).json({ error: 'Too big interval' });
+      }
+
+      if (req.query.interval === 'hour' && dayjs(req.query.dateTo).diff(dayjs(req.query.dateFrom), 'day') > 90) {
+        return res.status(400).json({ error: 'Too big interval' });
+      }
+
+      const data = await dataStorage.getUsersActivity({
+        dateFrom: dayjs(req.query.dateFrom).utc().toDate(),
+        dateTo: dayjs(req.query.dateTo).utc().toDate(),
+        interval: req.query.interval,
+      });
+      return res.json(data);
+    } catch (e) {
+      return next(e);
+    }
+  });
+
+  router.get('/count', validation(eventsExplorerSchema), async (req: TypedRequest<typeof eventsExplorerSchema>, res, next) => {
+    try {
+      if (req.query.interval === 'minute' && dayjs(req.query.dateTo).diff(dayjs(req.query.dateFrom), 'day') > 7) {
+        return res.status(400).json({ error: 'Too big interval' });
+      }
+
+      if (req.query.interval === 'hour' && dayjs(req.query.dateTo).diff(dayjs(req.query.dateFrom), 'day') > 90) {
+        return res.status(400).json({ error: 'Too big interval' });
+      }
+
+      const data = await dataStorage.getEventsCount({
+        dateFrom: dayjs(req.query.dateFrom).utc().toDate(),
+        dateTo: dayjs(req.query.dateTo).utc().toDate(),
+        interval: req.query.interval,
+      });
+      return res.json(data);
+    } catch (e) {
+      return next(e);
+    }
+  });
+
+  router.get('/pathnames', async (req: TypedRequest<typeof eventsExplorerSchema>, res, next) => {
+    try {
+      const data = await dataStorage.getPathnamesPopularity({
+        dateFrom: dayjs(req.query.dateFrom).utc().toDate(),
+        dateTo: dayjs(req.query.dateTo).utc().toDate(),
+      });
+      return res.json(data);
     } catch (e) {
       return next(e);
     }
