@@ -29,7 +29,7 @@ export function initializeUsersController({
     },
   };
 
-  router.post('/', validation(loginSchema), async (req: TypedRequest<typeof loginSchema>, res, next) => {
+  router.post('/login', validation(loginSchema), async (req: TypedRequest<typeof loginSchema>, res, next) => {
     try {
       const { email, password } = req.body;
       const user = await dataStorage.getUserByEmail({ email });
@@ -54,6 +54,13 @@ export function initializeUsersController({
       const refreshToken = jwt.sign({ sub: user.id }, jwtSecret, {
         algorithm: 'HS256',
         expiresIn: refreshTokenExpiresIn,
+      });
+
+      await dataStorage.addSession({
+        refreshToken,
+        userId: user.id,
+        expiresAt: dayjs(refreshTokenExpiresAt).utc().toDate(),
+        ip: req.headers['x-forwarded-for']?.toString() || req.socket.remoteAddress || '',
       });
 
       return res.json({

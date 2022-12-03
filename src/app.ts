@@ -55,7 +55,7 @@ if (process.env.USER_EMAIL && process.env.USER_PASSWORD) {
   clickHouseStorage.getUserByEmail({ email: process.env.USER_EMAIL })
     .then((user) => {
       if (!user) {
-        return clickHouseStorage.insertUser({
+        return clickHouseStorage.addUser({
           email: process.env.USER_EMAIL || '',
           passwordHash,
           salt,
@@ -79,8 +79,8 @@ app.use('/api/online', initializeOnlineController({ dataStorage: clickHouseStora
 app.use('/api/users', initializeUsersController({
   dataStorage: clickHouseStorage,
   jwtSecret: process.env.JWT_SECRET || '',
-  tokenExpiresIn: Number(process.env.TOKEN_EXPIRES_IN || 86400),
-  refreshTokenExpiresIn: Number(process.env.REFRESH_TOKEN_EXPIRES_IN || 604800),
+  tokenExpiresIn: Number(process.env.TOKEN_EXPIRE_IN || 86400),
+  refreshTokenExpiresIn: Number(process.env.REFRESH_TOKEN_EXPIRE_IN || 604800),
 }));
 
 app.use(errorHandler);

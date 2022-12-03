@@ -7,10 +7,11 @@ import utc from 'dayjs/plugin/utc';
 import { CronJob } from 'cron';
 import {
   AddEvent,
+  AddSession,
+  AddUser,
   CountOnline,
   DataStorage,
   GetUserByEmail,
-  InsertUser,
   SearchForEvents,
   Timespan,
 } from '../dataStorage';
@@ -61,6 +62,26 @@ export class ClickHouseStorage implements DataStorage {
       backupCron.start();
       const nextBackupDates = backupCron.nextDates();
       console.info('Next backup run at', nextBackupDates.toFormat('yyyy-MM-dd HH:mm:ss'));
+    }
+  }
+
+  async addSession(data: AddSession): Promise<void> {
+    try {
+      await this.storageConfig.clickHouse.insert({
+        table: 'sessions',
+        values: [{
+          user_id: data.userId,
+          expires_at: dayjs(data.expiresAt).utc().format('YYYY-MM-DD HH:mm:ss'),
+          refresh_token: data.refreshToken,
+          ip: data.ip,
+        }],
+        format: 'JSONEachRow',
+      });
+
+      return Promise.resolve();
+    } catch (err) {
+      console.error('Inserting session failed', err);
+      return Promise.reject(err);
     }
   }
 
@@ -251,7 +272,7 @@ export class ClickHouseStorage implements DataStorage {
     return Promise.resolve(parsedResponse);
   }
 
-  async insertUser(user: InsertUser): Promise<void> {
+  async addUser(user: AddUser): Promise<void> {
     try {
       await this.storageConfig.clickHouse.insert({
         table: 'users',
@@ -265,7 +286,7 @@ export class ClickHouseStorage implements DataStorage {
 
       return Promise.resolve();
     } catch (err) {
-      console.error('Inserting events failed', err);
+      console.error('Inserting user failed', err);
       return Promise.reject(err);
     }
   }

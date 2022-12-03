@@ -33,10 +33,17 @@ export type GetUserByEmail = {
   email: string,
 }
 
-export type InsertUser = {
+export type AddUser = {
   email: string,
   passwordHash: string,
   salt: string,
+}
+
+export type AddSession = {
+  userId: string,
+  expiresAt: Date,
+  refreshToken: string,
+  ip: string,
 }
 
 export interface DataStorage {
@@ -49,5 +56,6 @@ export interface DataStorage {
   countOnline(online: CountOnline): Promise<number>;
   countOnline(online: CountOnline): Promise<number>;
   getUserByEmail(data: GetUserByEmail): Promise<User | null>;
-  insertUser(user: InsertUser): Promise<void>;
+  addSession(data: AddSession): Promise<void>;
+  addUser(user: AddUser): Promise<void>;
 }
