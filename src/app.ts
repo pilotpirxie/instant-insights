@@ -51,31 +51,33 @@ clickHouseStorage.migrate(path.join(__dirname, 'migrations')).then(() => {
   process.exit(1);
 });
 
-if (process.env.USER_EMAIL && process.env.USER_PASSWORD) {
-  console.info('Creating user', process.env.USER_EMAIL);
+setTimeout(() => {
+  if (process.env.USER_EMAIL && process.env.USER_PASSWORD) {
+    console.info('Creating user', process.env.USER_EMAIL);
 
-  const salt = crypto.randomBytes(16).toString('hex');
-  const passwordHash = crypto.pbkdf2Sync(process.env.USER_PASSWORD, salt, 1000, 64, 'sha512').toString('hex');
+    const salt = crypto.randomBytes(16).toString('hex');
+    const passwordHash = crypto.pbkdf2Sync(process.env.USER_PASSWORD, salt, 1000, 64, 'sha512').toString('hex');
 
-  clickHouseStorage.getUserByEmail({ email: process.env.USER_EMAIL })
-    .then((user) => {
-      if (!user) {
-        return clickHouseStorage.addUser({
-          email: process.env.USER_EMAIL || '',
-          passwordHash,
-          salt,
-        });
-      }
-      console.info('User already exists, skipping');
-    }).then(() => {
-      console.info('User has been created');
-    }).catch((err) => {
-      console.error('Failed to get user', err);
-      process.exit(1);
-    });
-} else {
-  console.info('No user credentials provided. Skipping default user creation');
-}
+    clickHouseStorage.getUserByEmail({ email: process.env.USER_EMAIL })
+      .then((user) => {
+        if (!user) {
+          return clickHouseStorage.addUser({
+            email: process.env.USER_EMAIL || '',
+            passwordHash,
+            salt,
+          });
+        }
+        console.info('User already exists, skipping');
+      }).then(() => {
+        console.info('User has been created');
+      }).catch((err) => {
+        console.error('Failed to get user', err);
+        process.exit(1);
+      });
+  } else {
+    console.info('No user credentials provided. Skipping default user creation');
+  }
+}, 3000);
 
 app.use(bodyParser.json({ limit: process.env.MAX_EVENT_SIZE || '1KB' }));
 
