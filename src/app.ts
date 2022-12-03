@@ -15,7 +15,7 @@ const port = process.env.PORT || 3000;
 const app: Express = express();
 
 app.use(express.static(path.join(__dirname, 'public')));
-app.get('(/*)?', async (req, res) => {
+app.get('/', async (req, res) => {
   res.sendFile(path.join(__dirname, 'public', 'index.html'));
 });
 
@@ -77,7 +77,7 @@ setTimeout(() => {
   } else {
     console.info('No user credentials provided. Skipping default user creation');
   }
-}, 3000);
+}, 2000);
 
 app.use(bodyParser.json({ limit: process.env.MAX_EVENT_SIZE || '1KB' }));
 
