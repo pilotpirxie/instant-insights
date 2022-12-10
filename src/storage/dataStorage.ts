@@ -63,11 +63,13 @@ export type EventsExplorer = {
   dateFrom: Date,
   dateTo?: Date,
   interval: string,
+  os?: string,
 }
 
 export type PathnamesPopularity = {
   dateFrom: Date,
   dateTo?: Date,
+  os?: string,
 }
 
 export interface DataStorage {

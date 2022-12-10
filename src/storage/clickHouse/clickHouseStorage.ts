@@ -383,12 +383,17 @@ export class ClickHouseStorage implements DataStorage {
       query += ' AND created_at <= {dateTo: DATETIME}';
     }
 
+    if (data.os !== 'all') {
+      query += " AND meta['os'] = {os: VARCHAR}";
+    }
+
     query += ' GROUP BY date ORDER BY date ASC';
     const response = await this.storageConfig.clickHouse.query({
       query,
       query_params: {
         dateTo: data.dateTo ? dayjs(data.dateTo).utc().format('YYYY-MM-DD HH:mm:ss') : '',
         dateFrom: data.dateFrom,
+        os: data.os,
       },
       format: 'JSONEachRow',
     });
@@ -413,12 +418,17 @@ export class ClickHouseStorage implements DataStorage {
       query += ' AND created_at <= {dateTo: DATETIME}';
     }
 
+    if (data.os !== 'all') {
+      query += " AND meta['os'] = {os: VARCHAR}";
+    }
+
     query += ' GROUP BY pathname ORDER BY count DESC';
     const response = await this.storageConfig.clickHouse.query({
       query,
       query_params: {
         dateTo: data.dateTo ? dayjs(data.dateTo).utc().format('YYYY-MM-DD HH:mm:ss') : '',
         dateFrom: data.dateFrom,
+        os: data.os,
       },
       format: 'JSONEachRow',
     });
@@ -469,12 +479,17 @@ export class ClickHouseStorage implements DataStorage {
       query += ' AND created_at <= {dateTo: DATETIME}';
     }
 
+    if (data.os !== 'all') {
+      query += " AND meta['os'] = {os: VARCHAR}";
+    }
+
     query += ' GROUP BY date ORDER BY date ASC';
     const response = await this.storageConfig.clickHouse.query({
       query,
       query_params: {
         dateTo: data.dateTo ? dayjs(data.dateTo).utc().format('YYYY-MM-DD HH:mm:ss') : '',
         dateFrom: data.dateFrom,
+        os: data.os,
       },
       format: 'JSONEachRow',
     });

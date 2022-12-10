@@ -128,6 +128,7 @@ export function initializeEventsController({ dataStorage }: controllerParams): R
       dateFrom: Joi.string().required(),
       dateTo: Joi.string(),
       interval: Joi.string().allow('minute', 'hour', 'day', 'week', 'month', 'year').required(),
+      os: Joi.string().allow('all', 'android', 'ios').optional(),
     },
   };
 
@@ -145,6 +146,7 @@ export function initializeEventsController({ dataStorage }: controllerParams): R
         dateFrom: dayjs(req.query.dateFrom).utc().toDate(),
         dateTo: dayjs(req.query.dateTo).utc().toDate(),
         interval: req.query.interval,
+        os: req.query.os || 'all',
       });
       return res.json(data);
     } catch (e) {
@@ -166,6 +168,7 @@ export function initializeEventsController({ dataStorage }: controllerParams): R
         dateFrom: dayjs(req.query.dateFrom).utc().toDate(),
         dateTo: dayjs(req.query.dateTo).utc().toDate(),
         interval: req.query.interval,
+        os: req.query.os || 'all',
       });
       return res.json(data);
     } catch (e) {
@@ -178,6 +181,7 @@ export function initializeEventsController({ dataStorage }: controllerParams): R
       const data = await dataStorage.getPathnamesPopularity({
         dateFrom: dayjs(req.query.dateFrom).utc().toDate(),
         dateTo: dayjs(req.query.dateTo).utc().toDate(),
+        os: req.query.os || 'all',
       });
       return res.json(data);
     } catch (e) {
