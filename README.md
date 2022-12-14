@@ -25,9 +25,10 @@ Once the server is running, you can access the GUI by opening a web browser and 
 To run the project using Docker, you will need to have Docker installed on your machine. Once Docker is installed, you can build the Docker image for the project by running the following command in the project directory:
 ```shell
 # Change ClickHouse credentials to match your server
-docker run -p 3000:3000 \
-  -e CLICKHOUSE_NAME='defaultdb' \
-  -e CLICKHOUSE_URL='http://db:8123' \
+docker run -d -p 3000:3000 \
+  --network=host \
+  -e CLICKHOUSE_NAME='insights' \
+  -e CLICKHOUSE_URL='http://localhost:8123' \
   -e CLICKHOUSE_USER='secretuser' \
   -e CLICKHOUSE_PASS='mysecretpassword' \
   pilotpirxie/instant-insights
