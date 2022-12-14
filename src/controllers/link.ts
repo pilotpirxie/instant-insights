@@ -28,11 +28,10 @@ export function initializeLinkController({
   const getLinkSchema = {
     params: {
       linkName: Joi.string().required(),
-      affiliate: Joi.string().max(64).optional().allow(''),
     },
   };
 
-  router.get('/:linkName/:affiliate?', async (req: TypedRequest<typeof getLinkSchema>, res, next) => {
+  router.get('/:linkName', async (req: TypedRequest<typeof getLinkSchema>, res, next) => {
     try {
       const { ip } = req;
       if (!ip) return res.sendStatus(400);
@@ -43,7 +42,7 @@ export function initializeLinkController({
       const os = ua.os.name;
       const osVersion = ua.os.version;
 
-      const { linkName, affiliate } = req.params;
+      const { linkName } = req.params;
 
       let links: Links | undefined | null;
 
@@ -58,7 +57,6 @@ export function initializeLinkController({
 
       dataStorage.addLinkHit({
         name: linkName,
-        affiliate: affiliate || '',
         meta: {
           ip,
           os: os || 'other',

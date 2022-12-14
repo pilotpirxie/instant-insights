@@ -75,7 +75,6 @@ export type PathnamesPopularity = {
 
 export type AddLinkHit = {
   name: string,
-  affiliate: string,
   meta: { [p: string]: string },
   params: { [p: string]: string },
 };

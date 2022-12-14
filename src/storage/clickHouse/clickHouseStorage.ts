@@ -201,11 +201,10 @@ export class ClickHouseStorage implements DataStorage {
   }
 
   async addLinkHit({
-    name, meta, params, affiliate,
+    name, meta, params,
   }: AddLinkHit): Promise<void> {
     this.localLinkHits.push({
       name,
-      affiliate,
       meta,
       params,
       created_at: dayjs().utc().format('YYYY-MM-DD HH:mm:ss'),

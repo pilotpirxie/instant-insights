@@ -2,7 +2,6 @@ CREATE TABLE IF NOT EXISTS link_hits
 (
     id UUID DEFAULT generateUUIDv4(),
     name       VARCHAR,
-    affiliate  VARCHAR,
     meta Map(String, String),
     params Map(String, String),
     created_at DATETIME('UTC') DEFAULT now()
