@@ -81,8 +81,8 @@ setTimeout(() => {
 
 app.use(bodyParser.json({ limit: process.env.MAX_EVENT_SIZE || '1KB' }));
 
-app.use('/api/events', initializeEventsController({ dataStorage: clickHouseStorage }));
-app.use('/api/online', initializeOnlineController({ dataStorage: clickHouseStorage }));
+app.use('/api/events', initializeEventsController({ dataStorage: clickHouseStorage, jwtSecret: process.env.JWT_SECRET || '' }));
+app.use('/api/online', initializeOnlineController({ dataStorage: clickHouseStorage, jwtSecret: process.env.JWT_SECRET || '' }));
 app.use('/api/users', initializeUsersController({
   dataStorage: clickHouseStorage,
   jwtSecret: process.env.JWT_SECRET || '',

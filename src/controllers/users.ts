@@ -46,12 +46,12 @@ export function initializeUsersController({
       const tokenExpiresAt = dayjs().add(tokenExpiresIn, 'seconds').unix() * 1000;
       const refreshTokenExpiresAt = dayjs().add(refreshTokenExpiresIn, 'seconds').unix() * 1000;
 
-      const token = jwt.sign({ sub: user.id }, jwtSecret, {
+      const token = jwt.sign({ sub: user.id, aud: 'api' }, jwtSecret, {
         algorithm: 'HS256',
         expiresIn: tokenExpiresIn,
       });
 
-      const refreshToken = jwt.sign({ sub: user.id }, jwtSecret, {
+      const refreshToken = jwt.sign({ sub: user.id, aud: 'refresh' }, jwtSecret, {
         algorithm: 'HS256',
         expiresIn: refreshTokenExpiresIn,
       });
@@ -92,12 +92,12 @@ export function initializeUsersController({
       const tokenExpiresAt = dayjs().add(tokenExpiresIn, 'seconds').unix() * 1000;
       const refreshTokenExpiresAt = dayjs().add(refreshTokenExpiresIn, 'seconds').unix() * 1000;
 
-      const token = jwt.sign({ sub: session.userId }, jwtSecret, {
+      const token = jwt.sign({ sub: session.userId, aud: 'api' }, jwtSecret, {
         algorithm: 'HS256',
         expiresIn: tokenExpiresIn,
       });
 
-      const newRefreshToken = jwt.sign({ sub: session.userId }, jwtSecret, {
+      const newRefreshToken = jwt.sign({ sub: session.userId, aud: 'refresh' }, jwtSecret, {
         algorithm: 'HS256',
         expiresIn: refreshTokenExpiresIn,
       });

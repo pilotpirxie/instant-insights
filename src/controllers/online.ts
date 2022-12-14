@@ -5,15 +5,18 @@ import utc from 'dayjs/plugin/utc';
 import validation from '../middlewares/validation';
 import { TypedRequest } from '../types/express';
 import { DataStorage } from '../storage/dataStorage';
+import { jwtVerifyMiddleware } from '../middlewares/jwt';
 
 dayjs.extend(utc);
 
 type controllerParams = {
   dataStorage: DataStorage,
+  jwtSecret: string
 }
 
-export function initializeOnlineController({ dataStorage }: controllerParams): Router {
+export function initializeOnlineController({ dataStorage, jwtSecret }: controllerParams): Router {
   const router = Router();
+  const jwt = jwtVerifyMiddleware(jwtSecret);
 
   const getOnlineSchema = {
     query: {
@@ -21,7 +24,7 @@ export function initializeOnlineController({ dataStorage }: controllerParams): R
     },
   };
 
-  router.get('/', validation(getOnlineSchema), async (req: TypedRequest<typeof getOnlineSchema>, res, next) => {
+  router.get('/', jwt, validation(getOnlineSchema), async (req: TypedRequest<typeof getOnlineSchema>, res, next) => {
     try {
       const {
         pathname,

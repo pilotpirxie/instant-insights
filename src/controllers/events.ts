@@ -6,15 +6,18 @@ import utc from 'dayjs/plugin/utc';
 import validation from '../middlewares/validation';
 import { TypedRequest } from '../types/express';
 import { DataStorage } from '../storage/dataStorage';
+import { jwtVerifyMiddleware } from '../middlewares/jwt';
 
 dayjs.extend(utc);
 
 type controllerParams = {
   dataStorage: DataStorage,
+  jwtSecret: string
 }
 
-export function initializeEventsController({ dataStorage }: controllerParams): Router {
+export function initializeEventsController({ dataStorage, jwtSecret }: controllerParams): Router {
   const router = Router();
+  const jwt = jwtVerifyMiddleware(jwtSecret);
 
   const addEventSchema = {
     query: {
@@ -69,7 +72,7 @@ export function initializeEventsController({ dataStorage }: controllerParams): R
     },
   };
 
-  router.get('/', validation(getEventSchema), async (req: TypedRequest<typeof getEventSchema>, res, next) => {
+  router.get('/', jwt, validation(getEventSchema), async (req: TypedRequest<typeof getEventSchema>, res, next) => {
     try {
       const {
         pathname, type, limit, dateFrom, dateTo, fingerprint,
@@ -96,7 +99,7 @@ export function initializeEventsController({ dataStorage }: controllerParams): R
     },
   };
 
-  router.get('/types', validation(getTypesSchema), async (req: TypedRequest<typeof getTypesSchema>, res, next) => {
+  router.get('/types', jwt, validation(getTypesSchema), async (req: TypedRequest<typeof getTypesSchema>, res, next) => {
     try {
       const {
         dateTo, dateFrom,
@@ -114,7 +117,7 @@ export function initializeEventsController({ dataStorage }: controllerParams): R
 
   const getSummarySchema = {};
 
-  router.get('/summary', async (req: TypedRequest<typeof getSummarySchema>, res, next) => {
+  router.get('/summary', jwt, async (req: TypedRequest<typeof getSummarySchema>, res, next) => {
     try {
       const summary = await dataStorage.getSummary();
       return res.json(summary);
@@ -132,7 +135,7 @@ export function initializeEventsController({ dataStorage }: controllerParams): R
     },
   };
 
-  router.get('/activity', async (req: TypedRequest<typeof eventsExplorerSchema>, res, next) => {
+  router.get('/activity', jwt, async (req: TypedRequest<typeof eventsExplorerSchema>, res, next) => {
     try {
       if (req.query.interval === 'minute' && dayjs(req.query.dateTo).diff(dayjs(req.query.dateFrom), 'day') > 7) {
         return res.status(400).json({ error: 'Too big interval' });
@@ -154,7 +157,7 @@ export function initializeEventsController({ dataStorage }: controllerParams): R
     }
   });
 
-  router.get('/count', validation(eventsExplorerSchema), async (req: TypedRequest<typeof eventsExplorerSchema>, res, next) => {
+  router.get('/count', jwt, validation(eventsExplorerSchema), async (req: TypedRequest<typeof eventsExplorerSchema>, res, next) => {
     try {
       if (req.query.interval === 'minute' && dayjs(req.query.dateTo).diff(dayjs(req.query.dateFrom), 'day') > 7) {
         return res.status(400).json({ error: 'Too big interval' });
@@ -176,7 +179,7 @@ export function initializeEventsController({ dataStorage }: controllerParams): R
     }
   });
 
-  router.get('/pathnames', async (req: TypedRequest<typeof eventsExplorerSchema>, res, next) => {
+  router.get('/pathnames', jwt, async (req: TypedRequest<typeof eventsExplorerSchema>, res, next) => {
     try {
       const data = await dataStorage.getPathnamesPopularity({
         dateFrom: dayjs(req.query.dateFrom).utc().toDate(),
