@@ -1,9 +1,19 @@
 # instant-insights
 Track events from different systems using ClickHouse. It includes a graphical user interface (GUI) that allows users to easily interact with the data and perform a variety of analyses.
 
-To use the "instant-insights" project, you will need to have Node.js installed on your local machine. Alternatively, you can run the project using Docker.
+### Features
+* anonymous user tracking,
+* number of users online,
+* users events activity,
+* pathname popularity,
+* OS popularity,
+* users activity at certain timespan,
+* events explorer,
 
+### Screenshots
 ![Screenshoot](./img/screenshoot.png)
+
+To use the "instant-insights" project, you will need to have Node.js installed on your local machine. Alternatively, you can run the project using Docker.
 
 ### Run using Node.js
 To run the project locally with Node.js, clone the repository and navigate to the project directory. Then, run the following command to install the required dependencies:
