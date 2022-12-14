@@ -7,6 +7,7 @@ import utc from 'dayjs/plugin/utc';
 import { CronJob } from 'cron';
 import {
   AddEvent,
+  AddLinkHit,
   AddSession,
   AddUser,
   CountOnline,
@@ -19,7 +20,7 @@ import {
   Timespan,
   UpdateSession,
 } from '../dataStorage';
-import { EventEntity } from './entities';
+import { EventEntity, LinkHitEntity } from './entities';
 import { Event } from '../../domain/event';
 import { Pathname } from '../../domain/pathname';
 import { Type } from '../../domain/type';
@@ -27,6 +28,8 @@ import { User } from '../../domain/user';
 import { Session } from '../../domain/session';
 import { Summary } from '../../domain/summary';
 import { EventsExplorerData } from '../../domain/eventsExplorerData';
+import Links from '../../domain/links';
+import RedirectLink from '../../domain/redirectLink';
 
 dayjs.extend(utc);
 
@@ -50,9 +53,14 @@ export class ClickHouseStorage implements DataStorage {
 
   private localEvents: EventEntity[];
 
+  private localLinkHits: LinkHitEntity[];
+
   constructor(storageConfig: ClickHouseStorageConfig) {
     this.storageConfig = storageConfig;
+
     this.localEvents = [];
+    this.localLinkHits = [];
+
     const insertCron = new CronJob(
       this.storageConfig.cronInsertPattern,
       () => this.batchInsert(),
@@ -110,22 +118,42 @@ export class ClickHouseStorage implements DataStorage {
   }
 
   async batchInsert(): Promise<void> {
-    if (this.storageConfig.clickHouse !== undefined && this.localEvents.length > 0) {
-      this.storageConfig.clickHouse.insert({
-        table: 'events',
-        values: [...this.localEvents],
-        format: 'JSONEachRow',
-      }).then(() => {
+    if (!this.storageConfig.clickHouse) return;
+
+    if (this.localEvents.length > 0) {
+      try {
+        await this.storageConfig.clickHouse.insert({
+          table: 'events',
+          values: [...this.localEvents],
+          format: 'JSONEachRow',
+        });
         console.info('Batch insert of', this.localEvents.length, 'events finished');
         this.localEvents = [];
-        return Promise.resolve();
-      }).catch((err) => {
+      } catch (err) {
         console.error('Failed to insert', this.localEvents.length, 'events');
         if (this.storageConfig.discardEventsOnInsertError) {
           this.localEvents = [];
         }
-        return Promise.reject(err);
-      });
+      }
+    }
+
+    if (this.localLinkHits.length > 0) {
+      try {
+        await this.storageConfig.clickHouse.insert({
+          table: 'link_hits',
+          values: [...this.localLinkHits],
+          format: 'JSONEachRow',
+        });
+        console.info('Batch insert of', this.localLinkHits.length, 'link hits finished');
+        this.localLinkHits = [];
+
+        return Promise.resolve();
+      } catch (err) {
+        console.error('Failed to insert', this.localLinkHits.length, 'link hits');
+        if (this.storageConfig.discardEventsOnInsertError) {
+          this.localLinkHits = [];
+        }
+      }
     }
   }
 
@@ -170,6 +198,40 @@ export class ClickHouseStorage implements DataStorage {
       created_at: dayjs().utc().format('YYYY-MM-DD HH:mm:ss'),
     });
     return Promise.resolve();
+  }
+
+  async addLinkHit({
+    name, meta, params, affiliate,
+  }: AddLinkHit): Promise<void> {
+    this.localLinkHits.push({
+      name,
+      affiliate,
+      meta,
+      params,
+      created_at: dayjs().utc().format('YYYY-MM-DD HH:mm:ss'),
+    });
+    return Promise.resolve();
+  }
+
+  async getLinks(name: string): Promise<Links | null> {
+    const response = this.storageConfig.clickHouse.query({
+      query: 'SELECT * FROM redirect_links WHERE name={name: VARCHAR}',
+      query_params: {
+        name,
+      },
+      format: 'JSONEachRow',
+    });
+
+    const parsedResponse = await (await response).json() as RedirectLink[];
+    if (parsedResponse.length === 0) {
+      return Promise.resolve(null);
+    }
+
+    return Promise.resolve({
+      ios: parsedResponse[0].links.ios || '',
+      android: parsedResponse[0].links.android || '',
+      other: parsedResponse[0].links.other || '',
+    });
   }
 
   async getEvents({

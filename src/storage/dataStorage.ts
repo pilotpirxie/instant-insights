@@ -5,6 +5,7 @@ import { User } from '../domain/user';
 import { Session } from '../domain/session';
 import { Summary } from '../domain/summary';
 import { EventsExplorerData } from '../domain/eventsExplorerData';
+import Links from '../domain/links';
 
 export type AddEvent = {
   pathname: string,
@@ -72,6 +73,13 @@ export type PathnamesPopularity = {
   os?: string,
 }
 
+export type AddLinkHit = {
+  name: string,
+  affiliate: string,
+  meta: { [p: string]: string },
+  params: { [p: string]: string },
+};
+
 export interface DataStorage {
   migrate(dir: string): Promise<void>;
   backup(): Promise<void>;
@@ -90,4 +98,6 @@ export interface DataStorage {
   getUsersActivity(data: EventsExplorer): Promise<EventsExplorerData>;
   getEventsCount(data: EventsExplorer): Promise<EventsExplorerData>;
   getPathnamesPopularity(data: PathnamesPopularity): Promise<EventsExplorerData>;
+  getLinks(name: string): Promise<Links | null>;
+  addLinkHit(data: AddLinkHit): Promise<void>;
 }

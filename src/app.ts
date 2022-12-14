@@ -4,18 +4,22 @@ import bodyParser from 'body-parser';
 import { createClient } from '@clickhouse/client';
 import path from 'path';
 import crypto from 'crypto';
+import NodeCache from 'node-cache';
+import UAParser from 'ua-parser-js';
 import { errorHandler } from './middlewares/errors';
 import { ClickHouseStorage } from './storage/clickHouse/clickHouseStorage';
 import { initializeEventsController } from './controllers/events';
 import { initializeOnlineController } from './controllers/online';
 import { initializeUsersController } from './controllers/users';
+import { initializeLinkController } from './controllers/link';
 
 dotenv.config();
 const port = process.env.PORT || 3000;
 const app: Express = express();
 
+app.set('trust proxy', true);
 app.use(express.static(path.join(__dirname, 'public')));
-app.get(/^((?!\/api).)*$/, async (req, res) => {
+app.get(/^((?!\/(api|link)).)*$/, async (req, res) => {
   res.sendFile(path.join(__dirname, 'public', 'index.html'));
 });
 
@@ -89,7 +93,15 @@ app.use('/api/users', initializeUsersController({
   tokenExpiresIn: Number(process.env.TOKEN_EXPIRE_IN || 86400),
   refreshTokenExpiresIn: Number(process.env.REFRESH_TOKEN_EXPIRE_IN || 604800),
 }));
-
+app.use('/link', initializeLinkController({
+  cacheStorage: new NodeCache({
+    stdTTL: 30,
+    checkperiod: 60,
+  }),
+  dataStorage: clickHouseStorage,
+  jwtSecret: process.env.JWT_SECRET || '',
+  uaParser: new UAParser(),
+}));
 app.use(errorHandler);
 
 app.listen(port, () => {
