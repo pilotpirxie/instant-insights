@@ -5,17 +5,20 @@ import dayjs from 'dayjs';
 import utc from 'dayjs/plugin/utc';
 import validation from '../middlewares/validation';
 import { TypedRequest } from '../types/express';
-import { DataStorage } from '../storage/dataStorage';
 import { jwtVerifyMiddleware } from '../middlewares/jwt';
+import { EventsRepositoryData } from '../data/eventsRepositoryData';
 
 dayjs.extend(utc);
 
 type controllerParams = {
-  dataStorage: DataStorage,
+  eventsRepository: EventsRepositoryData,
   jwtSecret: string
 }
 
-export function initializeEventsController({ dataStorage, jwtSecret }: controllerParams): Router {
+export function initializeEventsController({
+  eventsRepository,
+  jwtSecret,
+}: controllerParams): Router {
   const router = Router();
   const jwt = jwtVerifyMiddleware(jwtSecret);
 
@@ -46,7 +49,7 @@ export function initializeEventsController({ dataStorage, jwtSecret }: controlle
         pathname, type, params, meta, fingerprint,
       } = req.body;
 
-      dataStorage.addEvent({
+      eventsRepository.addEvent({
         pathname,
         params,
         meta,
@@ -78,7 +81,7 @@ export function initializeEventsController({ dataStorage, jwtSecret }: controlle
         pathname, type, limit, dateFrom, dateTo, fingerprint,
       } = req.query;
 
-      const events = await dataStorage.getEvents({
+      const events = await eventsRepository.getEvents({
         pathname,
         limit,
         type,
@@ -105,7 +108,7 @@ export function initializeEventsController({ dataStorage, jwtSecret }: controlle
         dateTo, dateFrom,
       } = req.query;
 
-      const events = await dataStorage.getTypes({
+      const events = await eventsRepository.getTypes({
         dateFrom: dayjs(dateFrom).utc().toDate(),
         dateTo: dayjs(dateTo).utc().toDate(),
       });
@@ -119,7 +122,7 @@ export function initializeEventsController({ dataStorage, jwtSecret }: controlle
 
   router.get('/summary', jwt, async (req: TypedRequest<typeof getSummarySchema>, res, next) => {
     try {
-      const summary = await dataStorage.getSummary();
+      const summary = await eventsRepository.getSummary();
       return res.json(summary);
     } catch (e) {
       return next(e);
@@ -145,7 +148,7 @@ export function initializeEventsController({ dataStorage, jwtSecret }: controlle
         return res.status(400).json({ error: 'Too big interval' });
       }
 
-      const data = await dataStorage.getUsersActivity({
+      const data = await eventsRepository.getUsersActivity({
         dateFrom: dayjs(req.query.dateFrom).utc().toDate(),
         dateTo: dayjs(req.query.dateTo).utc().toDate(),
         interval: req.query.interval,
@@ -167,7 +170,7 @@ export function initializeEventsController({ dataStorage, jwtSecret }: controlle
         return res.status(400).json({ error: 'Too big interval' });
       }
 
-      const data = await dataStorage.getEventsCount({
+      const data = await eventsRepository.getEventsCount({
         dateFrom: dayjs(req.query.dateFrom).utc().toDate(),
         dateTo: dayjs(req.query.dateTo).utc().toDate(),
         interval: req.query.interval,
@@ -181,7 +184,7 @@ export function initializeEventsController({ dataStorage, jwtSecret }: controlle
 
   router.get('/pathnames', jwt, async (req: TypedRequest<typeof eventsExplorerSchema>, res, next) => {
     try {
-      const data = await dataStorage.getPathnamesPopularity({
+      const data = await eventsRepository.getPathnamesPopularity({
         dateFrom: dayjs(req.query.dateFrom).utc().toDate(),
         dateTo: dayjs(req.query.dateTo).utc().toDate(),
         os: req.query.os || 'all',

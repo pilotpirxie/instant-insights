@@ -5,21 +5,21 @@ import utc from 'dayjs/plugin/utc';
 import NodeCache from 'node-cache';
 import UAParser from 'ua-parser-js';
 import Joi from 'joi';
-import { DataStorage } from '../storage/dataStorage';
 import { TypedRequest } from '../types/express';
 import Links from '../domain/links';
+import { LinksRepositoryData } from '../data/linksRepositoryData';
 
 dayjs.extend(utc);
 
 type controllerParams = {
-  dataStorage: DataStorage,
+  linksRepository: LinksRepositoryData,
   cacheStorage: NodeCache,
   jwtSecret: string,
   uaParser: UAParser
 }
 
 export function initializeLinkController({
-  dataStorage,
+  linksRepository,
   cacheStorage,
   uaParser,
 }: controllerParams): Router {
@@ -49,13 +49,13 @@ export function initializeLinkController({
       if (cacheStorage.has(linkName)) {
         links = cacheStorage.get<Links>(linkName);
       } else {
-        links = await dataStorage.getLinks(linkName);
+        links = await linksRepository.getLinks(linkName);
         cacheStorage.set(linkName, links);
       }
 
       if (!links) return res.sendStatus(404);
 
-      dataStorage.addLinkHit({
+      linksRepository.addLinkHit({
         name: linkName,
         meta: {
           ip,

@@ -4,21 +4,24 @@ import utc from 'dayjs/plugin/utc';
 import Joi from 'joi';
 import crypto from 'crypto';
 import jwt from 'jsonwebtoken';
-import { DataStorage } from '../storage/dataStorage';
 import { TypedRequest } from '../types/express';
 import validation from '../middlewares/validation';
+import { UsersRepositoryData } from '../data/usersRepositoryData';
 
 dayjs.extend(utc);
 
 type OnlineControllerParams = {
+  usersRepository: UsersRepositoryData;
   jwtSecret: string;
   tokenExpiresIn: number;
   refreshTokenExpiresIn: number;
-  dataStorage: DataStorage,
 }
 
 export function initializeUsersController({
-  dataStorage, refreshTokenExpiresIn, tokenExpiresIn, jwtSecret,
+  usersRepository,
+  refreshTokenExpiresIn,
+  tokenExpiresIn,
+  jwtSecret,
 }: OnlineControllerParams): Router {
   const router = Router();
 
@@ -32,7 +35,7 @@ export function initializeUsersController({
   router.post('/login', validation(loginSchema), async (req: TypedRequest<typeof loginSchema>, res, next) => {
     try {
       const { email, password } = req.body;
-      const user = await dataStorage.getUserByEmail({ email });
+      const user = await usersRepository.getUserByEmail({ email });
 
       if (!user) {
         return res.sendStatus(401);
@@ -56,7 +59,7 @@ export function initializeUsersController({
         expiresIn: refreshTokenExpiresIn,
       });
 
-      await dataStorage.addSession({
+      await usersRepository.addSession({
         refreshToken,
         userId: user.id,
         expiresAt: dayjs(refreshTokenExpiresAt).utc().toDate(),
@@ -83,7 +86,7 @@ export function initializeUsersController({
   router.post('/refresh-token', validation(refreshTokenSchema), async (req: TypedRequest<typeof refreshTokenSchema>, res, next) => {
     try {
       const { refreshToken } = req.body;
-      const session = await dataStorage.getSessionByRefreshToken({ refreshToken });
+      const session = await usersRepository.getSessionByRefreshToken({ refreshToken });
 
       if (!session) {
         return res.sendStatus(401);
@@ -102,7 +105,7 @@ export function initializeUsersController({
         expiresIn: refreshTokenExpiresIn,
       });
 
-      await dataStorage.updateSession({
+      await usersRepository.updateSession({
         id: session.id,
         newRefreshToken,
         expiresAt: dayjs(refreshTokenExpiresAt).utc().toDate(),

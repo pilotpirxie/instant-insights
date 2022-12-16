@@ -7,11 +7,14 @@ import crypto from 'crypto';
 import NodeCache from 'node-cache';
 import UAParser from 'ua-parser-js';
 import { errorHandler } from './middlewares/errors';
-import { ClickHouseStorage } from './storage/clickHouse/clickHouseStorage';
+import { ClickHouseMaintenance } from './data/maintenance/clickHouseMaintenance';
 import { initializeEventsController } from './controllers/events';
 import { initializeOnlineController } from './controllers/online';
 import { initializeUsersController } from './controllers/users';
 import { initializeLinkController } from './controllers/link';
+import { UsersRepository } from './data/repositories/usersRepository';
+import EventsRepository from './data/repositories/eventsRepository';
+import { LinksRepository } from './data/repositories/linksRepository';
 
 dotenv.config();
 const port = process.env.PORT || 3000;
@@ -33,11 +36,8 @@ const clickHouseClient = createClient({
   max_open_connections: Number(process.env.CLICKHOUSE_MAX_OPEN_CONNECTIONS || Infinity),
 });
 
-const clickHouseStorage = new ClickHouseStorage({
+const maintenance = new ClickHouseMaintenance({
   clickHouse: clickHouseClient,
-  onlineTimespan: Number(process.env.ONLINE_TIMESPAN || 5),
-  discardEventsOnInsertError: process.env.DISCARD_EVENTS_ON_INSERT_ERROR === 'true',
-  cronInsertPattern: process.env.CRON_INSERT_PATTERN || '* * * * * *',
   backupToS3: {
     secretKey: process.env.BACKUP_TO_S3_SECRET_KEY || '',
     accessKey: process.env.BACKUP_TO_S3_ACCESS_KEY || '',
@@ -48,47 +48,64 @@ const clickHouseStorage = new ClickHouseStorage({
   },
 });
 
-clickHouseStorage.migrate(path.join(__dirname, 'migrations')).then(() => {
+const usersRepository = new UsersRepository({
+  clickHouse: clickHouseClient,
+});
+
+const eventsRepository = new EventsRepository({
+  clickHouse: clickHouseClient,
+  onlineTimespan: Number(process.env.ONLINE_TIMESPAN || 300),
+  discardEventsOnInsertError: process.env.DISCARD_EVENTS_ON_INSERT_ERROR === 'true',
+  cronInsertPattern: process.env.CRON_INSERT_PATTERN || '0 */1 * * *',
+});
+
+const linksRepository = new LinksRepository({
+  clickHouse: clickHouseClient,
+  cronInsertPattern: process.env.CRON_INSERT_PATTERN || '0 */1 * * *',
+  discardEventsOnInsertError: process.env.DISCARD_EVENTS_ON_INSERT_ERROR === 'true',
+});
+
+maintenance.migrate(path.join(__dirname, 'migrations')).then(() => {
   console.info('Migration has been completed');
 }).catch((err) => {
   console.error('Migration failed', err);
   process.exit(1);
 });
 
-setTimeout(() => {
-  if (process.env.USER_EMAIL && process.env.USER_PASSWORD) {
-    console.info('Creating user', process.env.USER_EMAIL);
+setTimeout(async () => {
+  try {
+    if (!process.env.USER_EMAIL || !process.env.USER_PASSWORD) {
+      console.info('No user credentials provided. Skipping default user creation');
+      return;
+    }
 
     const salt = crypto.randomBytes(16).toString('hex');
     const passwordHash = crypto.pbkdf2Sync(process.env.USER_PASSWORD, salt, 1000, 64, 'sha512').toString('hex');
 
-    clickHouseStorage.getUserByEmail({ email: process.env.USER_EMAIL })
-      .then((user) => {
-        if (!user) {
-          return clickHouseStorage.addUser({
-            email: process.env.USER_EMAIL || '',
-            passwordHash,
-            salt,
-          });
-        }
-        console.info('User already exists, skipping');
-      }).then(() => {
-        console.info('User has been created');
-      }).catch((err) => {
-        console.error('Failed to get user', err);
-        process.exit(1);
+    const user = await usersRepository.getUserByEmail({ email: process.env.USER_EMAIL });
+
+    if (!user) {
+      console.info('Creating user', process.env.USER_EMAIL);
+      await usersRepository.addUser({
+        email: process.env.USER_EMAIL || '',
+        passwordHash,
+        salt,
       });
-  } else {
-    console.info('No user credentials provided. Skipping default user creation');
+      console.info('User has been created');
+    }
+    console.info('User already exists, skipping');
+  } catch (err) {
+    console.error('Failed to get user');
+    process.exit(1);
   }
 }, 2000);
 
 app.use(bodyParser.json({ limit: process.env.MAX_EVENT_SIZE || '1KB' }));
 
-app.use('/api/events', initializeEventsController({ dataStorage: clickHouseStorage, jwtSecret: process.env.JWT_SECRET || '' }));
-app.use('/api/online', initializeOnlineController({ dataStorage: clickHouseStorage, jwtSecret: process.env.JWT_SECRET || '' }));
+app.use('/api/events', initializeEventsController({ eventsRepository, jwtSecret: process.env.JWT_SECRET || '' }));
+app.use('/api/online', initializeOnlineController({ eventsRepository, jwtSecret: process.env.JWT_SECRET || '' }));
 app.use('/api/users', initializeUsersController({
-  dataStorage: clickHouseStorage,
+  usersRepository,
   jwtSecret: process.env.JWT_SECRET || '',
   tokenExpiresIn: Number(process.env.TOKEN_EXPIRE_IN || 86400),
   refreshTokenExpiresIn: Number(process.env.REFRESH_TOKEN_EXPIRE_IN || 604800),
@@ -98,7 +115,7 @@ app.use('/link', initializeLinkController({
     stdTTL: 30,
     checkperiod: 60,
   }),
-  dataStorage: clickHouseStorage,
+  linksRepository,
   jwtSecret: process.env.JWT_SECRET || '',
   uaParser: new UAParser(),
 }));

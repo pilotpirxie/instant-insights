@@ -4,17 +4,20 @@ import dayjs from 'dayjs';
 import utc from 'dayjs/plugin/utc';
 import validation from '../middlewares/validation';
 import { TypedRequest } from '../types/express';
-import { DataStorage } from '../storage/dataStorage';
 import { jwtVerifyMiddleware } from '../middlewares/jwt';
+import { EventsRepositoryData } from '../data/eventsRepositoryData';
 
 dayjs.extend(utc);
 
 type controllerParams = {
-  dataStorage: DataStorage,
+  eventsRepository: EventsRepositoryData,
   jwtSecret: string
 }
 
-export function initializeOnlineController({ dataStorage, jwtSecret }: controllerParams): Router {
+export function initializeOnlineController({
+  eventsRepository,
+  jwtSecret,
+}: controllerParams): Router {
   const router = Router();
   const jwt = jwtVerifyMiddleware(jwtSecret);
 
@@ -30,7 +33,7 @@ export function initializeOnlineController({ dataStorage, jwtSecret }: controlle
         pathname,
       } = req.query;
 
-      const online = await dataStorage.countOnline({
+      const online = await eventsRepository.countOnline({
         pathname,
       });
       return res.json({ online });
