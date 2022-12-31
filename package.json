@@ -23,7 +23,7 @@
   "scripts": {
     "run:js": "node ./dist/app.js",
     "run:ts": "ts-node ./src/app.ts",
-    "build": "tsc",
+    "build": "tsc && cp -r ./src/migrations dist/migrations && cp -r ./public dist/public",
     "dev": "nodemon",
     "eslint": "./node_modules/.bin/eslint src/ --ext .ts --ext .js --ext tsx --ext .jsx",
     "fix": "./node_modules/.bin/eslint --fix src/ --ext .ts --ext .js --ext tsx --ext .jsx"
