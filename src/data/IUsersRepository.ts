@@ -28,7 +28,7 @@ export type UpdateSession = {
   newRefreshToken: string,
 }
 
-export interface UsersRepositoryData {
+export interface IUsersRepository {
   getUserByEmail(data: GetUserByEmail): Promise<User | null>;
   addSession(data: AddSession): Promise<void>;
   addUser(user: AddUser): Promise<void>;

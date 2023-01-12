@@ -5,11 +5,11 @@ import {
   AddEvent,
   CountOnline,
   EventsExplorer,
-  EventsRepositoryData,
+  IEventsRepository,
   PathnamesPopularity,
   SearchForEvents,
   Timespan,
-} from '../eventsRepositoryData';
+} from '../IEventsRepository';
 import { Event } from '../../domain/event';
 import { Pathname } from '../../domain/pathname';
 import { EventType } from '../../domain/eventType';
@@ -56,7 +56,7 @@ function appendInterval(interval: string): string {
   return 'toStartOfYear(created_at) as date';
 }
 
-export default class EventsRepository implements EventsRepositoryData {
+export default class EventsRepository implements IEventsRepository {
   private config: EventsRepositoryConfig;
 
   private localEvents: EventEntity[];

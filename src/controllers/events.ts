@@ -6,12 +6,12 @@ import utc from 'dayjs/plugin/utc';
 import validation from '../middlewares/validation';
 import { TypedRequest } from '../types/express';
 import { jwtVerifyMiddleware } from '../middlewares/jwt';
-import { EventsRepositoryData } from '../data/eventsRepositoryData';
+import { IEventsRepository } from '../data/IEventsRepository';
 
 dayjs.extend(utc);
 
 type controllerParams = {
-  eventsRepository: EventsRepositoryData,
+  eventsRepository: IEventsRepository,
   jwtSecret: string
 }
 

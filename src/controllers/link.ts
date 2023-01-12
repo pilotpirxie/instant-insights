@@ -7,12 +7,12 @@ import UAParser from 'ua-parser-js';
 import Joi from 'joi';
 import { TypedRequest } from '../types/express';
 import Links from '../domain/links';
-import { LinksRepositoryData } from '../data/linksRepositoryData';
+import { ILinksRepository } from '../data/ILinksRepository';
 
 dayjs.extend(utc);
 
 type controllerParams = {
-  linksRepository: LinksRepositoryData,
+  linksRepository: ILinksRepository,
   cacheStorage: NodeCache,
   jwtSecret: string,
   uaParser: UAParser

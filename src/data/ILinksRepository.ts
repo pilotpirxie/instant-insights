@@ -6,7 +6,7 @@ export type AddLinkHit = {
   params: { [p: string]: string },
 };
 
-export interface LinksRepositoryData {
+export interface ILinksRepository {
   getLinks(name: string): Promise<Links | null>;
   addLinkHit(data: AddLinkHit): Promise<void>;
 }

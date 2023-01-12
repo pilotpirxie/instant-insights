@@ -1,7 +1,7 @@
 import dayjs from 'dayjs';
 import { CronJob } from 'cron';
 import { ClickHouseClient } from '@clickhouse/client';
-import { AddLinkHit, LinksRepositoryData } from '../linksRepositoryData';
+import { AddLinkHit, ILinksRepository } from '../ILinksRepository';
 import Links from '../../domain/links';
 import RedirectLink from '../../domain/redirectLink';
 
@@ -18,7 +18,7 @@ export type LinkHitEntity = {
   created_at?: string,
 }
 
-export class LinksRepository implements LinksRepositoryData {
+export class LinksRepository implements ILinksRepository {
   private config: LinksRepositoryConfig;
 
   private localLinkHits: LinkHitEntity[];

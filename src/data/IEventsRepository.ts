@@ -43,7 +43,7 @@ export type PathnamesPopularity = {
   os?: string,
 }
 
-export interface EventsRepositoryData {
+export interface IEventsRepository {
   addEvent(event: AddEvent): Promise<void>;
   getEvents(search: SearchForEvents): Promise<Event[]>;
   getPathnames(search: Timespan): Promise<Pathname[]>;

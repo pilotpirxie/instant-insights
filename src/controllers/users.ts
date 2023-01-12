@@ -6,12 +6,12 @@ import crypto from 'crypto';
 import jwt from 'jsonwebtoken';
 import { TypedRequest } from '../types/express';
 import validation from '../middlewares/validation';
-import { UsersRepositoryData } from '../data/usersRepositoryData';
+import { IUsersRepository } from '../data/IUsersRepository';
 
 dayjs.extend(utc);
 
 type OnlineControllerParams = {
-  usersRepository: UsersRepositoryData;
+  usersRepository: IUsersRepository;
   jwtSecret: string;
   tokenExpiresIn: number;
   refreshTokenExpiresIn: number;

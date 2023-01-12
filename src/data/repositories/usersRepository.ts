@@ -5,9 +5,9 @@ import {
   AddUser,
   GetSessionByRefreshToken,
   GetUserByEmail,
+  IUsersRepository,
   UpdateSession,
-  UsersRepositoryData,
-} from '../usersRepositoryData';
+} from '../IUsersRepository';
 import { User } from '../../domain/user';
 import { Session } from '../../domain/session';
 
@@ -15,7 +15,7 @@ export type UsersRepositoryConfig = {
   clickHouse: ClickHouseClient;
 }
 
-export class UsersRepository implements UsersRepositoryData {
+export class UsersRepository implements IUsersRepository {
   private config: UsersRepositoryConfig;
 
   constructor(config: UsersRepositoryConfig) {

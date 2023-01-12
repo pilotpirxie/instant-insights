@@ -5,7 +5,7 @@ import fs from 'fs';
 import dayjs from 'dayjs';
 import utc from 'dayjs/plugin/utc';
 import { CronJob } from 'cron';
-import { Maintenance } from '../maintenance';
+import { IMaintenance } from '../IMaintenance';
 
 dayjs.extend(utc);
 
@@ -21,7 +21,7 @@ export type ClickHouseStorageConfig = {
   },
 }
 
-export class ClickHouseMaintenance implements Maintenance {
+export class ClickHouseMaintenance implements IMaintenance {
   private storageConfig: ClickHouseStorageConfig;
 
   constructor(storageConfig: ClickHouseStorageConfig) {
