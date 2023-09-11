@@ -1,13 +1,15 @@
 package com.instantinsights.api.controllers;
 
 import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
 import java.util.HashMap;
 import java.util.Map;
 
-@RestController
-class TestController {
+@RestController()
+@RequestMapping("/events")
+class EventController {
 
     @GetMapping("/test")
     public Map<String, String> test() {
