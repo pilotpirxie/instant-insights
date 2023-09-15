@@ -43,9 +43,11 @@ CREATE TABLE "teams"
 
 CREATE TABLE "users_teams"
 (
-    "user_id" uuid REFERENCES "users" ("id") ON DELETE CASCADE,
-    "team_id" uuid REFERENCES "teams" ("id") ON DELETE CASCADE,
-    "role"    user_role NOT NULL DEFAULT 'viewer',
+    "user_id"    uuid REFERENCES "users" ("id") ON DELETE CASCADE,
+    "team_id"    uuid REFERENCES "teams" ("id") ON DELETE CASCADE,
+    "role"       user_role NOT NULL DEFAULT 'viewer',
+    "created_at" timestamp NOT NULL,
+    "updated_at" timestamp NOT NULL,
     PRIMARY KEY ("user_id", "team_id")
 );
 

@@ -1,10 +1,10 @@
 package com.instantinsights.api.entities;
 
 import jakarta.persistence.*;
-import org.hibernate.annotations.Type;
 
 import java.net.InetAddress;
 import java.time.LocalDateTime;
+import java.util.Set;
 import java.util.UUID;
 
 @Entity
@@ -46,18 +46,16 @@ public class User {
     @Column(name = "updated_at", nullable = false)
     private LocalDateTime updatedAt;
 
-    public User(UUID id,
-                String email,
-                String password,
-                String salt,
-                String emailVerificationCode,
-                LocalDateTime emailVerifiedAt,
-                InetAddress registerIp,
-                boolean isDisabled,
-                String totpToken,
-                LocalDateTime createdAt,
-                LocalDateTime updatedAt
-    ) {
+    @ManyToMany(mappedBy = "users")
+    private Set<Team> teams;
+
+    @OneToMany(mappedBy = "user")
+    private Set<Session> sessions;
+
+    @OneToMany(mappedBy = "user")
+    private Set<PasswordRecovery> passwordRecoveries;
+
+    public User(UUID id, String email, String password, String salt, String emailVerificationCode, LocalDateTime emailVerifiedAt, InetAddress registerIp, boolean isDisabled, String totpToken, LocalDateTime createdAt, LocalDateTime updatedAt, Set<Team> teams, Set<Session> sessions, Set<PasswordRecovery> passwordRecoveries) {
         this.id = id;
         this.email = email;
         this.password = password;
@@ -69,6 +67,12 @@ public class User {
         this.totpToken = totpToken;
         this.createdAt = createdAt;
         this.updatedAt = updatedAt;
+        this.teams = teams;
+        this.sessions = sessions;
+        this.passwordRecoveries = passwordRecoveries;
+    }
+
+    public User() {
     }
 
     public UUID getId() {
@@ -157,5 +161,29 @@ public class User {
 
     public void setUpdatedAt(LocalDateTime updatedAt) {
         this.updatedAt = updatedAt;
+    }
+
+    public Set<Team> getTeams() {
+        return teams;
+    }
+
+    public void setTeams(Set<Team> teams) {
+        this.teams = teams;
+    }
+
+    public Set<Session> getSessions() {
+        return sessions;
+    }
+
+    public void setSessions(Set<Session> sessions) {
+        this.sessions = sessions;
+    }
+
+    public Set<PasswordRecovery> getPasswordRecoveries() {
+        return passwordRecoveries;
+    }
+
+    public void setPasswordRecoveries(Set<PasswordRecovery> passwordRecoveries) {
+        this.passwordRecoveries = passwordRecoveries;
     }
 }
