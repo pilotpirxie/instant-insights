@@ -13,11 +13,8 @@ import java.util.stream.Collectors;
 @Service
 public class UserAccountService implements AccountService {
 
-    private final UserRepository userRepository;
-
     @Autowired
     public UserAccountService(UserRepository userRepository) {
-        this.userRepository = userRepository;
     }
 
     @Override

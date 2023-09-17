@@ -58,38 +58,47 @@ CREATE TABLE "apps"
     "name"       varchar          NOT NULL,
     "is_active"  boolean          NOT NULL,
     "created_at" timestamp        NOT NULL,
-    "updated_at" timestamp        NOT NULL
+    "updated_at" timestamp        NOT NULL,
+
+    CONSTRAINT "apps_name_unique" UNIQUE ("name")
 );
 
 CREATE TABLE "event_types"
 (
     "id"          uuid PRIMARY KEY NOT NULL,
-    "app_id"      uuid             NOT NULL REFERENCES "apps" ("id") ON DELETE CASCADE,
+    "app_name"    varchar          NOT NULL REFERENCES "apps" ("name") ON DELETE CASCADE,
     "name"        varchar          NOT NULL,
     "description" text             NOT NULL,
     "schema"      JSONB            NOT NULL,
     "is_active"   boolean          NOT NULL,
     "created_at"  timestamp        NOT NULL,
-    "updated_at"  timestamp        NOT NULL
+    "updated_at"  timestamp        NOT NULL,
+
+    CONSTRAINT "event_types_app_name_name_unique" UNIQUE ("app_name", "name")
 );
 
 CREATE TABLE "events"
 (
     "id"         uuid PRIMARY KEY NOT NULL,
-    "type_id"    uuid             NOT NULL REFERENCES "event_types" ("id") ON DELETE CASCADE,
-    "app_id"     uuid             NOT NULL REFERENCES "apps" ("id") ON DELETE CASCADE,
+    "type_name"  varchar          NOT NULL,
+    "app_name"   varchar          NOT NULL,
     "meta"       JSONB            NOT NULL,
     "params"     JSONB            NOT NULL,
-    "created_at" timestamp        NOT NULL
+    "created_at" timestamp        NOT NULL,
+
+    CONSTRAINT "events_type_name_app_name_fk" FOREIGN KEY ("type_name", "app_name") REFERENCES "event_types" ("name", "app_name") ON DELETE CASCADE
+
 );
 
 CREATE TABLE "tracked_links"
 (
     "id"             uuid PRIMARY KEY NOT NULL,
-    "app_id"         uuid             NOT NULL REFERENCES "apps" ("id") ON DELETE CASCADE,
+    "app_name"       varchar          NOT NULL REFERENCES "apps" ("name") ON DELETE CASCADE,
     "url_slug"       varchar          NOT NULL,
     "is_active"      boolean          NOT NULL,
     "redirect_rules" JSONB            NOT NULL,
     "created_at"     timestamp        NOT NULL,
-    "updated_at"     timestamp        NOT NULL
+    "updated_at"     timestamp        NOT NULL,
+
+    CONSTRAINT "tracked_links_app_name_url_slug_unique" UNIQUE ("app_name", "url_slug")
 );

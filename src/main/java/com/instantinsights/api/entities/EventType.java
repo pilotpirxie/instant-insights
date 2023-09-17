@@ -35,10 +35,13 @@ public class EventType {
     private LocalDateTime updatedAt;
 
     @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "app_id", insertable = false, updatable = false)
+    @JoinColumn(name = "app_name", insertable = false, updatable = false)
     private App app;
 
-    public EventType(UUID id, String name, String description, Map<String, String> schema, Boolean isActive, LocalDateTime createdAt, LocalDateTime updatedAt, App app) {
+    @OneToMany(mappedBy = "eventType")
+    private Map<UUID, Event> events;
+
+    public EventType(UUID id, String name, String description, Map<String, String> schema, Boolean isActive, LocalDateTime createdAt, LocalDateTime updatedAt, App app, Map<UUID, Event> events) {
         this.id = id;
         this.name = name;
         this.description = description;
@@ -47,6 +50,7 @@ public class EventType {
         this.createdAt = createdAt;
         this.updatedAt = updatedAt;
         this.app = app;
+        this.events = events;
     }
 
     public EventType() {
@@ -114,5 +118,13 @@ public class EventType {
 
     public void setApp(App app) {
         this.app = app;
+    }
+
+    public Map<UUID, Event> getEvents() {
+        return events;
+    }
+
+    public void setEvents(Map<UUID, Event> events) {
+        this.events = events;
     }
 }

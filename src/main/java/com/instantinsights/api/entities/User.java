@@ -46,8 +46,8 @@ public class User {
     @Column(name = "updated_at", nullable = false)
     private LocalDateTime updatedAt;
 
-    @ManyToMany(mappedBy = "users")
-    private Set<Team> teams;
+    @OneToMany(mappedBy = "users")
+    private Set<UserTeam> teams;
 
     @OneToMany(mappedBy = "user")
     private Set<Session> sessions;
@@ -55,7 +55,7 @@ public class User {
     @OneToMany(mappedBy = "user")
     private Set<PasswordRecovery> passwordRecoveries;
 
-    public User(UUID id, String email, String password, String salt, String emailVerificationCode, LocalDateTime emailVerifiedAt, InetAddress registerIp, boolean isDisabled, String totpToken, LocalDateTime createdAt, LocalDateTime updatedAt, Set<Team> teams, Set<Session> sessions, Set<PasswordRecovery> passwordRecoveries) {
+    public User(UUID id, String email, String password, String salt, String emailVerificationCode, LocalDateTime emailVerifiedAt, InetAddress registerIp, boolean isDisabled, String totpToken, LocalDateTime createdAt, LocalDateTime updatedAt, Set<UserTeam> teams, Set<Session> sessions, Set<PasswordRecovery> passwordRecoveries) {
         this.id = id;
         this.email = email;
         this.password = password;
@@ -163,11 +163,11 @@ public class User {
         this.updatedAt = updatedAt;
     }
 
-    public Set<Team> getTeams() {
+    public Set<UserTeam> getTeams() {
         return teams;
     }
 
-    public void setTeams(Set<Team> teams) {
+    public void setTeams(Set<UserTeam> teams) {
         this.teams = teams;
     }
 

@@ -27,11 +27,11 @@ public class Event {
     private LocalDateTime createdAt;
 
     @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "type_id", insertable = false, updatable = false)
+    @JoinColumn(name = "type_name", insertable = false, updatable = false)
     private EventType eventType;
 
     @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "app_id", insertable = false, updatable = false)
+    @JoinColumn(name = "app_name", insertable = false, updatable = false)
     private App app;
 
     public Event(UUID id, Map<String, String> meta, Map<String, String> params, LocalDateTime createdAt, EventType eventType, App app) {

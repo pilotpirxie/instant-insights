@@ -21,12 +21,12 @@ public class UserTeam {
     private LocalDateTime updatedAt;
 
     @ManyToOne(fetch = FetchType.LAZY)
-    @MapsId("userId")
+    @MapsId("user_id")
     @JoinColumn(name = "user_id")
     private User user;
 
     @ManyToOne(fetch = FetchType.LAZY)
-    @MapsId("teamId")
+    @MapsId("team_id")
     @JoinColumn(name = "team_id")
     private Team team;
 

@@ -26,15 +26,10 @@ public class Team {
     @Column(name = "updated_at", nullable = false)
     private LocalDateTime updatedAt;
 
-    @ManyToMany
-    @JoinTable(
-            name = "users_teams",
-            joinColumns = @JoinColumn(name = "team_id"),
-            inverseJoinColumns = @JoinColumn(name = "user_id")
-    )
-    private Set<User> users;
+    @OneToMany(mappedBy = "teams")
+    private Set<UserTeam> users;
 
-    public Team(UUID id, String name, LocalDateTime createdAt, LocalDateTime updatedAt, Set<User> users) {
+    public Team(UUID id, String name, LocalDateTime createdAt, LocalDateTime updatedAt, Set<UserTeam> users) {
         this.id = id;
         this.name = name;
         this.createdAt = createdAt;
@@ -43,7 +38,6 @@ public class Team {
     }
 
     public Team() {
-
     }
 
     public UUID getId() {
@@ -78,11 +72,11 @@ public class Team {
         this.updatedAt = updatedAt;
     }
 
-    public Set<User> getUsers() {
+    public Set<UserTeam> getUsers() {
         return users;
     }
 
-    public void setUsers(Set<User> users) {
+    public void setUsers(Set<UserTeam> users) {
         this.users = users;
     }
 }

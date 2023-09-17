@@ -32,7 +32,7 @@ public class TrackedLink {
     private LocalDateTime updatedAt;
 
     @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "app_id", insertable = false, updatable = false)
+    @JoinColumn(name = "app_name", insertable = false, updatable = false)
     private App app;
 
     public TrackedLink(UUID id, String urlSlug, Boolean isActive, Map<String, String> redirectRules, LocalDateTime createdAt, LocalDateTime updatedAt, App app) {
