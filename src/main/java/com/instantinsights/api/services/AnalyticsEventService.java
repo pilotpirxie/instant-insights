@@ -35,7 +35,7 @@ public class AnalyticsEventService implements EventService {
 
     @Override
     public void updateEventType(String name, String description, Map<String, String> schema, App app) {
-        EventType eventType = eventTypeRepository.findByNameAndApp(name, app);
+//        EventType eventType = eventTypeRepository.findById(name).orElseThrow();
     }
 
     @Override

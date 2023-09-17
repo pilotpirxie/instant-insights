@@ -5,6 +5,7 @@ import jakarta.persistence.*;
 
 import java.time.LocalDateTime;
 import java.util.Map;
+import java.util.Set;
 import java.util.UUID;
 
 @Entity
@@ -39,9 +40,9 @@ public class EventType {
     private App app;
 
     @OneToMany(mappedBy = "eventType")
-    private Map<UUID, Event> events;
+    private Set<Event> events;
 
-    public EventType(UUID id, String name, String description, Map<String, String> schema, Boolean isActive, LocalDateTime createdAt, LocalDateTime updatedAt, App app, Map<UUID, Event> events) {
+    public EventType(UUID id, String name, String description, Map<String, String> schema, Boolean isActive, LocalDateTime createdAt, LocalDateTime updatedAt, App app, Set<Event> events) {
         this.id = id;
         this.name = name;
         this.description = description;
@@ -120,11 +121,11 @@ public class EventType {
         this.app = app;
     }
 
-    public Map<UUID, Event> getEvents() {
+    public Set<Event> getEvents() {
         return events;
     }
 
-    public void setEvents(Map<UUID, Event> events) {
+    public void setEvents(Set<Event> events) {
         this.events = events;
     }
 }
