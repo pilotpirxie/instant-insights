@@ -1,20 +1,24 @@
 package com.instantinsights.api.dto;
 
+import com.instantinsights.api.entities.PasswordRecovery;
+import com.instantinsights.api.entities.Session;
+import com.instantinsights.api.entities.Team;
+
 import java.net.InetAddress;
 import java.time.LocalDateTime;
+import java.util.Set;
 import java.util.UUID;
 
 public record UserDto(
         UUID id,
         String email,
-        String password,
-        String salt,
-        String emailVerificationCode,
         LocalDateTime emailVerifiedAt,
         InetAddress registerIp,
         boolean isDisabled,
-        String totpToken,
         LocalDateTime createdAt,
-        LocalDateTime updatedAt
+        LocalDateTime updatedAt,
+        Set<TeamDto> teams,
+        Set<SessionDto> sessions,
+        Set<PasswordRecoveryDto> passwordRecoveries
 ) {
 }
