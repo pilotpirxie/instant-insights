@@ -22,9 +22,9 @@ public interface EventService {
 
     void createEvent(UUID id, Map<String, String> meta, Map<String, String> params, EventType eventType, App app);
 
-    void deleteEvent(String name);
+    void deleteEvent(UUID id);
 
-    List<EventDto> queryEvents(String name, LocalDateTime start, LocalDateTime end, Map<String, String> params, App app, int limit, int offset);
+    List<EventDto> queryEvents(EventType eventType, LocalDateTime start, LocalDateTime end, Map<String, String> params, App app, int limit, int offset);
 
-    int getEventsCount(String name, LocalDateTime start, LocalDateTime end, Map<String, String> params, App app);
+    int getEventsCount(EventType eventType, LocalDateTime start, LocalDateTime end, Map<String, String> params, App app);
 }
