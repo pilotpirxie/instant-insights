@@ -34,14 +34,11 @@ public class App {
     @OneToMany(mappedBy = "app")
     private Map<UUID, EventType> eventTypes;
 
-    @OneToMany(mappedBy = "app")
-    private Set<User> users;
-
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "team_id", insertable = false, updatable = false)
     private Team team;
 
-    public App(UUID id, String name, Boolean isActive, LocalDateTime createdAt, LocalDateTime updatedAt, Map<UUID, Event> events, Map<UUID, EventType> eventTypes, Set<User> users, Team team) {
+    public App(UUID id, String name, Boolean isActive, LocalDateTime createdAt, LocalDateTime updatedAt, Map<UUID, Event> events, Map<UUID, EventType> eventTypes, Team team) {
         this.id = id;
         this.name = name;
         this.isActive = isActive;
@@ -49,7 +46,6 @@ public class App {
         this.updatedAt = updatedAt;
         this.events = events;
         this.eventTypes = eventTypes;
-        this.users = users;
         this.team = team;
     }
 
@@ -110,14 +106,6 @@ public class App {
 
     public void setEventTypes(Map<UUID, EventType> eventTypes) {
         this.eventTypes = eventTypes;
-    }
-
-    public Set<User> getUsers() {
-        return users;
-    }
-
-    public void setUsers(Set<User> users) {
-        this.users = users;
     }
 
     public Team getTeam() {

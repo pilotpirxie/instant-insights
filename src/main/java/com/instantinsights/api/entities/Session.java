@@ -1,5 +1,6 @@
 package com.instantinsights.api.entities;
 
+import com.instantinsights.api.dto.SessionDto;
 import jakarta.persistence.Entity;
 import jakarta.persistence.Table;
 import jakarta.persistence.*;
@@ -78,5 +79,14 @@ public class Session {
 
     public void setUser(User user) {
         this.user = user;
+    }
+
+    public static SessionDto toDto(Session session) {
+        return new SessionDto(
+                session.getId(),
+                session.getRefreshToken(),
+                session.getCreatedAt(),
+                session.getUpdatedAt()
+        );
     }
 }

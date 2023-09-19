@@ -10,7 +10,6 @@ public record TeamDto(
         UUID id,
         String name,
         LocalDateTime createdAt,
-        LocalDateTime updatedAt,
-        Set<User> users
+        LocalDateTime updatedAt
 ) {
 }

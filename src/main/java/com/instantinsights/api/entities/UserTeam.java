@@ -1,5 +1,7 @@
 package com.instantinsights.api.entities;
 
+import com.instantinsights.api.dto.TeamDto;
+import com.instantinsights.api.dto.UserTeamDto;
 import jakarta.persistence.*;
 
 import java.time.LocalDateTime;
@@ -89,5 +91,16 @@ public class UserTeam {
 
     public void setTeam(Team team) {
         this.team = team;
+    }
+
+    public static UserTeamDto toDto(UserTeam userTeam) {
+        return new UserTeamDto(
+                userTeam.getId(),
+                userTeam.getRole(),
+                userTeam.getCreatedAt(),
+                userTeam.getUpdatedAt(),
+                User.toDto(userTeam.getUser()),
+                Team.toDto(userTeam.getTeam())
+        );
     }
 }

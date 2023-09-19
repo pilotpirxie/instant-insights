@@ -6,8 +6,6 @@ import java.util.List;
 import java.util.UUID;
 
 public interface AccountService {
-    List<UserDto> getAllUsersByAppId(UUID appId);
-
     List<UserDto> getAllUsersByTeamId(UUID teamId);
 
     UserDto getUserById(UUID id);
@@ -17,10 +15,6 @@ public interface AccountService {
     UserDto updateUser(UserDto userDto);
 
     void deleteUser(UUID id);
-
-    void deleteUserFromTeam(UUID userId, UUID teamId);
-
-    void addUserToTeam(UUID userId, UUID teamId);
 
     void resetPassword(UUID userId);
 

@@ -1,5 +1,6 @@
 package com.instantinsights.api.entities;
 
+import com.instantinsights.api.dto.TeamDto;
 import jakarta.persistence.Entity;
 import jakarta.persistence.Table;
 import jakarta.persistence.*;
@@ -26,7 +27,7 @@ public class Team {
     @Column(name = "updated_at", nullable = false)
     private LocalDateTime updatedAt;
 
-    @OneToMany(mappedBy = "teams")
+    @OneToMany(mappedBy = "team")
     private Set<UserTeam> users;
 
     public Team(UUID id, String name, LocalDateTime createdAt, LocalDateTime updatedAt, Set<UserTeam> users) {
@@ -78,5 +79,23 @@ public class Team {
 
     public void setUsers(Set<UserTeam> users) {
         this.users = users;
+    }
+
+    public static TeamDto toDto(Team team) {
+        return new TeamDto(
+                team.getId(),
+                team.getName(),
+                team.getCreatedAt(),
+                team.getUpdatedAt()
+        );
+    }
+
+    public static TeamDto toDto(UserTeam userTeam) {
+        return new TeamDto(
+                userTeam.getTeam().getId(),
+                userTeam.getTeam().getName(),
+                userTeam.getTeam().getCreatedAt(),
+                userTeam.getTeam().getUpdatedAt()
+        );
     }
 }

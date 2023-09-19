@@ -1,11 +1,14 @@
 package com.instantinsights.api.entities;
 
+import com.instantinsights.api.dto.TeamDto;
+import com.instantinsights.api.dto.UserDto;
 import jakarta.persistence.*;
 
 import java.net.InetAddress;
 import java.time.LocalDateTime;
 import java.util.Set;
 import java.util.UUID;
+import java.util.stream.Collectors;
 
 @Entity
 @Table(name = "users")
@@ -46,7 +49,7 @@ public class User {
     @Column(name = "updated_at", nullable = false)
     private LocalDateTime updatedAt;
 
-    @OneToMany(mappedBy = "users")
+    @OneToMany(mappedBy = "user")
     private Set<UserTeam> teams;
 
     @OneToMany(mappedBy = "user")
@@ -185,5 +188,20 @@ public class User {
 
     public void setPasswordRecoveries(Set<PasswordRecovery> passwordRecoveries) {
         this.passwordRecoveries = passwordRecoveries;
+    }
+
+    public static UserDto toDto(User user) {
+        return new UserDto(
+                user.getId(),
+                user.getEmail(),
+                user.getEmailVerifiedAt(),
+                user.getRegisterIp(),
+                user.isDisabled(),
+                user.getCreatedAt(),
+                user.getUpdatedAt(),
+                user.getTeams().stream().map(Team::toDto).collect(Collectors.toSet()),
+                user.getSessions().stream().map(Session::toDto).collect(Collectors.toSet()),
+                user.getPasswordRecoveries().stream().map(PasswordRecovery::toDto).collect(Collectors.toSet())
+        );
     }
 }

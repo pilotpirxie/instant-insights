@@ -2,6 +2,8 @@ package com.instantinsights.api.services;
 
 import com.instantinsights.api.dto.UserDto;
 import com.instantinsights.api.entities.User;
+import com.instantinsights.api.repositories.PasswordRecoveryRepository;
+import com.instantinsights.api.repositories.SessionRepository;
 import com.instantinsights.api.repositories.UserRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -13,18 +15,20 @@ import java.util.stream.Collectors;
 @Service
 public class UserAccountService implements AccountService {
 
-    @Autowired
-    public UserAccountService(UserRepository userRepository) {
-    }
+    UserRepository userRepository;
+    SessionRepository sessionRepository;
+    PasswordRecoveryRepository passwordRecoveryRepository;
 
-    @Override
-    public List<UserDto> getAllUsersByAppId(UUID appId) {
-        return null;
+    @Autowired
+    public UserAccountService(UserRepository userRepository, SessionRepository sessionRepository, PasswordRecoveryRepository passwordRecoveryRepository) {
+        this.userRepository = userRepository;
+        this.sessionRepository = sessionRepository;
+        this.passwordRecoveryRepository = passwordRecoveryRepository;
     }
 
     @Override
     public List<UserDto> getAllUsersByTeamId(UUID teamId) {
-        return null;
+        return userRepository.findAllByTeamId(teamId).stream().map(User::toDto).collect(Collectors.toList());
     }
 
     @Override
@@ -44,16 +48,6 @@ public class UserAccountService implements AccountService {
 
     @Override
     public void deleteUser(UUID id) {
-
-    }
-
-    @Override
-    public void deleteUserFromTeam(UUID userId, UUID teamId) {
-
-    }
-
-    @Override
-    public void addUserToTeam(UUID userId, UUID teamId) {
 
     }
 

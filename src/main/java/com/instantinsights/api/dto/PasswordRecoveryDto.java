@@ -9,7 +9,6 @@ public record PasswordRecoveryDto(
         UUID id,
         String code,
         LocalDateTime createdAt,
-        LocalDateTime updatedAt,
-        User user
+        LocalDateTime updatedAt
 ) {
 }

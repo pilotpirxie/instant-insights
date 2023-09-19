@@ -1,5 +1,6 @@
 package com.instantinsights.api.entities;
 
+import com.instantinsights.api.dto.PasswordRecoveryDto;
 import jakarta.persistence.*;
 
 import java.time.LocalDateTime;
@@ -75,5 +76,14 @@ public class PasswordRecovery {
 
     public void setUser(User user) {
         this.user = user;
+    }
+
+    public static PasswordRecoveryDto toDto(PasswordRecovery passwordRecovery) {
+        return new PasswordRecoveryDto(
+                passwordRecovery.getId(),
+                passwordRecovery.getCode(),
+                passwordRecovery.getCreatedAt(),
+                passwordRecovery.getUpdatedAt()
+        );
     }
 }

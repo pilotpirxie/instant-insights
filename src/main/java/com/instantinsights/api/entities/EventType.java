@@ -36,7 +36,7 @@ public class EventType {
     private LocalDateTime updatedAt;
 
     @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "app_name", insertable = false, updatable = false)
+    @JoinColumn(name = "app_name", referencedColumnName = "name", insertable = false, updatable = false)
     private App app;
 
     @OneToMany(mappedBy = "eventType")
