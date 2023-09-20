@@ -11,6 +11,9 @@ import java.util.UUID;
 
 @Repository
 public interface UserRepository extends JpaRepository<User, UUID> {
-    @Query("SELECT u FROM User u JOIN u.teams t WHERE t.id = :teamId")
+    @Query(
+        value = "SELECT u FROM users u JOIN users_teams ut ON u.id = ut.user_id JOIN teams t ON ut.team_id = t.id WHERE t.id = :teamId",
+        nativeQuery = true
+    )
     List<User> findAllByTeamId(@Param("teamId") UUID teamId);
 }

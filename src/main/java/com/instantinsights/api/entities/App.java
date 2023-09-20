@@ -134,4 +134,17 @@ public class App {
             Team.toDto(app.getTeam())
         );
     }
+
+    public static App fromDto(AppDto appDto) {
+        return new App(
+            appDto.id(),
+            appDto.name(),
+            appDto.isActive(),
+            appDto.createdAt(),
+            appDto.updatedAt(),
+            null,
+            null,
+            Team.fromDto(appDto.team())
+        );
+    }
 }

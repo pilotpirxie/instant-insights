@@ -112,4 +112,15 @@ public class Event {
             App.toDto(event.getApp())
         );
     }
+
+    public static Event fromDto(EventDto eventDto) {
+        return new Event(
+            eventDto.id(),
+            eventDto.meta(),
+            eventDto.params(),
+            eventDto.createdAt(),
+            EventType.fromDto(eventDto.eventType()),
+            App.fromDto(eventDto.app())
+        );
+    }
 }

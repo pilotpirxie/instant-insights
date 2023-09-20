@@ -4,7 +4,6 @@ import com.instantinsights.api.dto.TeamDto;
 import jakarta.persistence.*;
 
 import java.time.LocalDateTime;
-import java.util.Set;
 import java.util.UUID;
 
 @Entity
@@ -25,15 +24,11 @@ public class Team {
     @Column(name = "updated_at", nullable = false)
     private LocalDateTime updatedAt;
 
-    @OneToMany(mappedBy = "team")
-    private Set<UserTeam> users;
-
-    public Team(UUID id, String name, LocalDateTime createdAt, LocalDateTime updatedAt, Set<UserTeam> users) {
+    public Team(UUID id, String name, LocalDateTime createdAt, LocalDateTime updatedAt) {
         this.id = id;
         this.name = name;
         this.createdAt = createdAt;
         this.updatedAt = updatedAt;
-        this.users = users;
     }
 
     public Team() {
@@ -71,20 +66,21 @@ public class Team {
         this.updatedAt = updatedAt;
     }
 
-    public Set<UserTeam> getUsers() {
-        return users;
-    }
-
-    public void setUsers(Set<UserTeam> users) {
-        this.users = users;
-    }
-
     public static TeamDto toDto(Team team) {
         return new TeamDto(
             team.getId(),
             team.getName(),
             team.getCreatedAt(),
             team.getUpdatedAt()
+        );
+    }
+
+    public static Team fromDto(TeamDto teamDto) {
+        return new Team(
+            teamDto.id(),
+            teamDto.name(),
+            teamDto.createdAt(),
+            teamDto.updatedAt()
         );
     }
 

@@ -152,4 +152,18 @@ public class EventType {
             App.toDto(eventType.getApp())
         );
     }
+
+    public static EventType fromDto(EventTypeDto eventTypeDto) {
+        return new EventType(
+            eventTypeDto.id(),
+            eventTypeDto.name(),
+            eventTypeDto.description(),
+            eventTypeDto.schema(),
+            eventTypeDto.isActive(),
+            eventTypeDto.createdAt(),
+            eventTypeDto.updatedAt(),
+            App.fromDto(eventTypeDto.app()),
+            Set.of()
+        );
+    }
 }

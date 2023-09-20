@@ -7,7 +7,6 @@ import java.net.InetAddress;
 import java.time.LocalDateTime;
 import java.util.Set;
 import java.util.UUID;
-import java.util.stream.Collectors;
 
 @Entity
 @Table(name = "users")
@@ -49,9 +48,6 @@ public class User {
     private LocalDateTime updatedAt;
 
     @OneToMany(mappedBy = "user")
-    private Set<UserTeam> teams;
-
-    @OneToMany(mappedBy = "user")
     private Set<Session> sessions;
 
     @OneToMany(mappedBy = "user")
@@ -69,7 +65,6 @@ public class User {
         String totpToken,
         LocalDateTime createdAt,
         LocalDateTime updatedAt,
-        Set<UserTeam> teams,
         Set<Session> sessions,
         Set<PasswordRecovery> passwordRecoveries
     ) {
@@ -84,7 +79,6 @@ public class User {
         this.totpToken = totpToken;
         this.createdAt = createdAt;
         this.updatedAt = updatedAt;
-        this.teams = teams;
         this.sessions = sessions;
         this.passwordRecoveries = passwordRecoveries;
     }
@@ -180,14 +174,6 @@ public class User {
         this.updatedAt = updatedAt;
     }
 
-    public Set<UserTeam> getTeams() {
-        return teams;
-    }
-
-    public void setTeams(Set<UserTeam> teams) {
-        this.teams = teams;
-    }
-
     public Set<Session> getSessions() {
         return sessions;
     }
@@ -212,8 +198,25 @@ public class User {
             user.getRegisterIp(),
             user.isDisabled(),
             user.getCreatedAt(),
-            user.getUpdatedAt(),
-            user.getTeams().stream().map(Team::toDto).collect(Collectors.toSet())
+            user.getUpdatedAt()
+        );
+    }
+
+    public static User fromDto(UserDto userDto) {
+        return new User(
+            userDto.id(),
+            userDto.email(),
+            null,
+            null,
+            null,
+            userDto.emailVerifiedAt(),
+            userDto.registerIp(),
+            userDto.isDisabled(),
+            null,
+            userDto.createdAt(),
+            userDto.updatedAt(),
+            Set.of(),
+            Set.of()
         );
     }
 }

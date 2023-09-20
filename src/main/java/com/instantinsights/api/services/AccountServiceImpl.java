@@ -13,14 +13,14 @@ import java.util.UUID;
 import java.util.stream.Collectors;
 
 @Service
-public class DefaultAccountService implements AccountService {
+public class AccountServiceImpl implements AccountService {
 
     UserRepository userRepository;
     SessionRepository sessionRepository;
     PasswordRecoveryRepository passwordRecoveryRepository;
 
     @Autowired
-    public DefaultAccountService(
+    public AccountServiceImpl(
         UserRepository userRepository,
         SessionRepository sessionRepository,
         PasswordRecoveryRepository passwordRecoveryRepository

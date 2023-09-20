@@ -124,4 +124,16 @@ public class TrackedLink {
             App.toDto(trackedLink.getApp())
         );
     }
+
+    public static TrackedLink fromDto(TrackedLinkDto trackedLinkDto) {
+        return new TrackedLink(
+            trackedLinkDto.id(),
+            trackedLinkDto.urlSlug(),
+            trackedLinkDto.isActive(),
+            trackedLinkDto.redirectRules(),
+            trackedLinkDto.createdAt(),
+            trackedLinkDto.updatedAt(),
+            App.fromDto(trackedLinkDto.app())
+        );
+    }
 }

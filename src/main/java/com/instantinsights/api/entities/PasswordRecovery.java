@@ -87,4 +87,14 @@ public class PasswordRecovery {
             User.toDto(passwordRecovery.getUser())
         );
     }
+
+    public static PasswordRecovery fromDto(PasswordRecoveryDto passwordRecoveryDto) {
+        return new PasswordRecovery(
+            passwordRecoveryDto.id(),
+            passwordRecoveryDto.code(),
+            passwordRecoveryDto.createdAt(),
+            passwordRecoveryDto.updatedAt(),
+            User.fromDto(passwordRecoveryDto.user())
+        );
+    }
 }

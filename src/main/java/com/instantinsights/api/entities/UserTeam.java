@@ -109,4 +109,15 @@ public class UserTeam {
             Team.toDto(userTeam.getTeam())
         );
     }
+
+    public static UserTeam fromDto(UserTeamDto userTeamDto) {
+        return new UserTeam(
+            userTeamDto.id(),
+            userTeamDto.role(),
+            userTeamDto.createdAt(),
+            userTeamDto.updatedAt(),
+            User.fromDto(userTeamDto.user()),
+            Team.fromDto(userTeamDto.team())
+        );
+    }
 }

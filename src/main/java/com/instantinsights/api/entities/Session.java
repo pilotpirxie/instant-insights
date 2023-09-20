@@ -88,4 +88,14 @@ public class Session {
             User.toDto(session.getUser())
         );
     }
+
+    public static Session fromDto(SessionDto sessionDto) {
+        return new Session(
+            sessionDto.id(),
+            sessionDto.refreshToken(),
+            sessionDto.createdAt(),
+            sessionDto.updatedAt(),
+            User.fromDto(sessionDto.user())
+        );
+    }
 }
