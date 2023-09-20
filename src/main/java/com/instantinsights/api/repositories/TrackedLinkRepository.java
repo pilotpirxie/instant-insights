@@ -1,11 +1,12 @@
 package com.instantinsights.api.repositories;
 
 import com.instantinsights.api.entities.Session;
+import com.instantinsights.api.entities.TrackedLink;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.stereotype.Repository;
 
 import java.util.UUID;
 
 @Repository
-public interface TrackedLink extends JpaRepository<TrackedLink, UUID> {
+public interface TrackedLinkRepository extends JpaRepository<TrackedLink, UUID> {
 }

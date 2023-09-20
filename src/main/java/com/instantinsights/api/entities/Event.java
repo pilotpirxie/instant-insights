@@ -27,7 +27,7 @@ public class Event {
     private LocalDateTime createdAt;
 
     @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "type_name", insertable = false, updatable = false)
+    @JoinColumn(name = "type_name", referencedColumnName = "name", insertable = false, updatable = false)
     private EventType eventType;
 
     @ManyToOne(fetch = FetchType.LAZY)
