@@ -1,5 +1,6 @@
 package com.instantinsights.api.entities;
 
+import com.instantinsights.api.dto.TrackedLinkDto;
 import com.instantinsights.api.utils.JsonbToMapConverter;
 import jakarta.persistence.*;
 
@@ -35,7 +36,15 @@ public class TrackedLink {
     @JoinColumn(name = "app_name", referencedColumnName = "name", insertable = false, updatable = false)
     private App app;
 
-    public TrackedLink(UUID id, String urlSlug, Boolean isActive, Map<String, String> redirectRules, LocalDateTime createdAt, LocalDateTime updatedAt, App app) {
+    public TrackedLink(
+        UUID id,
+        String urlSlug,
+        Boolean isActive,
+        Map<String, String> redirectRules,
+        LocalDateTime createdAt,
+        LocalDateTime updatedAt,
+        App app
+    ) {
         this.id = id;
         this.urlSlug = urlSlug;
         this.isActive = isActive;
@@ -102,5 +111,17 @@ public class TrackedLink {
 
     public void setApp(App app) {
         this.app = app;
+    }
+
+    public static TrackedLinkDto toDto(TrackedLink trackedLink) {
+        return new TrackedLinkDto(
+            trackedLink.getId(),
+            trackedLink.getUrlSlug(),
+            trackedLink.getActive(),
+            trackedLink.getRedirectRules(),
+            trackedLink.getCreatedAt(),
+            trackedLink.getUpdatedAt(),
+            App.toDto(trackedLink.getApp())
+        );
     }
 }

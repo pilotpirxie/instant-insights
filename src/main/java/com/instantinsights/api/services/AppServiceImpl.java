@@ -1,9 +1,9 @@
 package com.instantinsights.api.services;
 
-public class DefaultAppService implements AppService {
+public class AppServiceImpl implements AppService {
     @Override
     public void createApp(String name, String description) {
-        
+
     }
 
     @Override

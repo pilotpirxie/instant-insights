@@ -1,13 +1,16 @@
 package com.instantinsights.api.dto;
 
 import java.time.LocalDateTime;
+import java.util.Map;
 import java.util.UUID;
 
-public record PasswordRecoveryDto(
+public record TrackedLinkDto(
     UUID id,
-    String code,
+    String urlSlug,
+    Boolean isActive,
+    Map<String, String> redirectRules,
     LocalDateTime createdAt,
     LocalDateTime updatedAt,
-    UserDto user
+    AppDto app
 ) {
 }

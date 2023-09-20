@@ -1,6 +1,5 @@
 package com.instantinsights.api.entities;
 
-import com.instantinsights.api.dto.TeamDto;
 import com.instantinsights.api.dto.UserTeamDto;
 import jakarta.persistence.*;
 
@@ -32,7 +31,14 @@ public class UserTeam {
     @JoinColumn(name = "team_id")
     private Team team;
 
-    public UserTeam(UserTeamIdComposite id, UserRole role, LocalDateTime createdAt, LocalDateTime updatedAt, User user, Team team) {
+    public UserTeam(
+        UserTeamIdComposite id,
+        UserRole role,
+        LocalDateTime createdAt,
+        LocalDateTime updatedAt,
+        User user,
+        Team team
+    ) {
         this.id = id;
         this.role = role;
         this.createdAt = createdAt;
@@ -95,12 +101,12 @@ public class UserTeam {
 
     public static UserTeamDto toDto(UserTeam userTeam) {
         return new UserTeamDto(
-                userTeam.getId(),
-                userTeam.getRole(),
-                userTeam.getCreatedAt(),
-                userTeam.getUpdatedAt(),
-                User.toDto(userTeam.getUser()),
-                Team.toDto(userTeam.getTeam())
+            userTeam.getId(),
+            userTeam.getRole(),
+            userTeam.getCreatedAt(),
+            userTeam.getUpdatedAt(),
+            User.toDto(userTeam.getUser()),
+            Team.toDto(userTeam.getTeam())
         );
     }
 }

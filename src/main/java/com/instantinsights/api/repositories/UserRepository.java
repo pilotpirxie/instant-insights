@@ -1,6 +1,5 @@
 package com.instantinsights.api.repositories;
 
-import com.instantinsights.api.dto.UserDto;
 import com.instantinsights.api.entities.User;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;

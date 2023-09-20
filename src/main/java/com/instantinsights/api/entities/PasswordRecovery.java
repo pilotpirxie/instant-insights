@@ -80,10 +80,11 @@ public class PasswordRecovery {
 
     public static PasswordRecoveryDto toDto(PasswordRecovery passwordRecovery) {
         return new PasswordRecoveryDto(
-                passwordRecovery.getId(),
-                passwordRecovery.getCode(),
-                passwordRecovery.getCreatedAt(),
-                passwordRecovery.getUpdatedAt()
+            passwordRecovery.getId(),
+            passwordRecovery.getCode(),
+            passwordRecovery.getCreatedAt(),
+            passwordRecovery.getUpdatedAt(),
+            User.toDto(passwordRecovery.getUser())
         );
     }
 }

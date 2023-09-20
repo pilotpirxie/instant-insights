@@ -36,12 +36,12 @@ public class Event {
     private App app;
 
     public Event(
-            UUID id,
-            Map<String, String> meta,
-            Map<String, String> params,
-            LocalDateTime createdAt,
-            EventType eventType,
-            App app
+        UUID id,
+        Map<String, String> meta,
+        Map<String, String> params,
+        LocalDateTime createdAt,
+        EventType eventType,
+        App app
     ) {
         this.id = id;
         this.meta = meta;
@@ -104,12 +104,12 @@ public class Event {
 
     public static EventDto toDto(Event event) {
         return new EventDto(
-                event.getId(),
-                event.getMeta(),
-                event.getParams(),
-                event.getCreatedAt(),
-                EventType.toDto(event.getEventType()),
-                App.toDto(event.getApp())
+            event.getId(),
+            event.getMeta(),
+            event.getParams(),
+            event.getCreatedAt(),
+            EventType.toDto(event.getEventType()),
+            App.toDto(event.getApp())
         );
     }
 }

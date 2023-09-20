@@ -13,14 +13,18 @@ import java.util.UUID;
 import java.util.stream.Collectors;
 
 @Service
-public class UserAccountService implements AccountService {
+public class DefaultAccountService implements AccountService {
 
     UserRepository userRepository;
     SessionRepository sessionRepository;
     PasswordRecoveryRepository passwordRecoveryRepository;
 
     @Autowired
-    public UserAccountService(UserRepository userRepository, SessionRepository sessionRepository, PasswordRecoveryRepository passwordRecoveryRepository) {
+    public DefaultAccountService(
+        UserRepository userRepository,
+        SessionRepository sessionRepository,
+        PasswordRecoveryRepository passwordRecoveryRepository
+    ) {
         this.userRepository = userRepository;
         this.sessionRepository = sessionRepository;
         this.passwordRecoveryRepository = passwordRecoveryRepository;

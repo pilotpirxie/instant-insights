@@ -1,8 +1,6 @@
 package com.instantinsights.api.entities;
 
 import com.instantinsights.api.dto.TeamDto;
-import jakarta.persistence.Entity;
-import jakarta.persistence.Table;
 import jakarta.persistence.*;
 
 import java.time.LocalDateTime;
@@ -83,19 +81,19 @@ public class Team {
 
     public static TeamDto toDto(Team team) {
         return new TeamDto(
-                team.getId(),
-                team.getName(),
-                team.getCreatedAt(),
-                team.getUpdatedAt()
+            team.getId(),
+            team.getName(),
+            team.getCreatedAt(),
+            team.getUpdatedAt()
         );
     }
 
     public static TeamDto toDto(UserTeam userTeam) {
         return new TeamDto(
-                userTeam.getTeam().getId(),
-                userTeam.getTeam().getName(),
-                userTeam.getTeam().getCreatedAt(),
-                userTeam.getTeam().getUpdatedAt()
+            userTeam.getTeam().getId(),
+            userTeam.getTeam().getName(),
+            userTeam.getTeam().getCreatedAt(),
+            userTeam.getTeam().getUpdatedAt()
         );
     }
 }

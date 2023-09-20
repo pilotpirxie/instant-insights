@@ -19,13 +19,13 @@ import java.util.UUID;
 import java.util.stream.Collectors;
 
 @Service
-public class AnalyticsEventService implements EventService {
+public class EventServiceImpl implements EventService {
     private final EventRepository eventRepository;
     private final QueryEventRepository queryEventRepository;
     private final EventTypeRepository eventTypeRepository;
 
     @Autowired
-    public AnalyticsEventService(
+    public EventServiceImpl(
         EventRepository eventRepository,
         QueryEventRepository queryEventRepository,
         EventTypeRepository eventTypeRepository

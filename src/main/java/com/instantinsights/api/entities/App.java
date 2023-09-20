@@ -38,14 +38,14 @@ public class App {
     private Team team;
 
     public App(
-            UUID id,
-            String name,
-            Boolean isActive,
-            LocalDateTime createdAt,
-            LocalDateTime updatedAt,
-            Map<UUID, Event> events,
-            Map<UUID, EventType> eventTypes,
-            Team team
+        UUID id,
+        String name,
+        Boolean isActive,
+        LocalDateTime createdAt,
+        LocalDateTime updatedAt,
+        Map<UUID, Event> events,
+        Map<UUID, EventType> eventTypes,
+        Team team
     ) {
         this.id = id;
         this.name = name;
@@ -126,12 +126,12 @@ public class App {
 
     public static AppDto toDto(App app) {
         return new AppDto(
-                app.getId(),
-                app.getName(),
-                app.getActive(),
-                app.getCreatedAt(),
-                app.getUpdatedAt(),
-                Team.toDto(app.getTeam())
+            app.getId(),
+            app.getName(),
+            app.getActive(),
+            app.getCreatedAt(),
+            app.getUpdatedAt(),
+            Team.toDto(app.getTeam())
         );
     }
 }

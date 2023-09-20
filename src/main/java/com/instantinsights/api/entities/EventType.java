@@ -44,15 +44,15 @@ public class EventType {
     private Set<Event> events;
 
     public EventType(
-            UUID id,
-            String name,
-            String description,
-            Map<String, String> schema,
-            Boolean isActive,
-            LocalDateTime createdAt,
-            LocalDateTime updatedAt,
-            App app,
-            Set<Event> events
+        UUID id,
+        String name,
+        String description,
+        Map<String, String> schema,
+        Boolean isActive,
+        LocalDateTime createdAt,
+        LocalDateTime updatedAt,
+        App app,
+        Set<Event> events
     ) {
         this.id = id;
         this.name = name;
@@ -142,14 +142,14 @@ public class EventType {
 
     public static EventTypeDto toDto(EventType eventType) {
         return new EventTypeDto(
-                eventType.getId(),
-                eventType.getName(),
-                eventType.getDescription(),
-                eventType.getSchema(),
-                eventType.getActive(),
-                eventType.getCreatedAt(),
-                eventType.getUpdatedAt(),
-                App.toDto(eventType.getApp())
+            eventType.getId(),
+            eventType.getName(),
+            eventType.getDescription(),
+            eventType.getSchema(),
+            eventType.getActive(),
+            eventType.getCreatedAt(),
+            eventType.getUpdatedAt(),
+            App.toDto(eventType.getApp())
         );
     }
 }

@@ -1,8 +1,6 @@
 package com.instantinsights.api.entities;
 
 import com.instantinsights.api.dto.SessionDto;
-import jakarta.persistence.Entity;
-import jakarta.persistence.Table;
 import jakarta.persistence.*;
 
 import java.time.LocalDateTime;
@@ -83,10 +81,11 @@ public class Session {
 
     public static SessionDto toDto(Session session) {
         return new SessionDto(
-                session.getId(),
-                session.getRefreshToken(),
-                session.getCreatedAt(),
-                session.getUpdatedAt()
+            session.getId(),
+            session.getRefreshToken(),
+            session.getCreatedAt(),
+            session.getUpdatedAt(),
+            User.toDto(session.getUser())
         );
     }
 }

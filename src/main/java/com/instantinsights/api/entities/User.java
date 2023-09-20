@@ -1,6 +1,5 @@
 package com.instantinsights.api.entities;
 
-import com.instantinsights.api.dto.TeamDto;
 import com.instantinsights.api.dto.UserDto;
 import jakarta.persistence.*;
 
@@ -58,7 +57,22 @@ public class User {
     @OneToMany(mappedBy = "user")
     private Set<PasswordRecovery> passwordRecoveries;
 
-    public User(UUID id, String email, String password, String salt, String emailVerificationCode, LocalDateTime emailVerifiedAt, InetAddress registerIp, boolean isDisabled, String totpToken, LocalDateTime createdAt, LocalDateTime updatedAt, Set<UserTeam> teams, Set<Session> sessions, Set<PasswordRecovery> passwordRecoveries) {
+    public User(
+        UUID id,
+        String email,
+        String password,
+        String salt,
+        String emailVerificationCode,
+        LocalDateTime emailVerifiedAt,
+        InetAddress registerIp,
+        boolean isDisabled,
+        String totpToken,
+        LocalDateTime createdAt,
+        LocalDateTime updatedAt,
+        Set<UserTeam> teams,
+        Set<Session> sessions,
+        Set<PasswordRecovery> passwordRecoveries
+    ) {
         this.id = id;
         this.email = email;
         this.password = password;
@@ -192,16 +206,14 @@ public class User {
 
     public static UserDto toDto(User user) {
         return new UserDto(
-                user.getId(),
-                user.getEmail(),
-                user.getEmailVerifiedAt(),
-                user.getRegisterIp(),
-                user.isDisabled(),
-                user.getCreatedAt(),
-                user.getUpdatedAt(),
-                user.getTeams().stream().map(Team::toDto).collect(Collectors.toSet()),
-                user.getSessions().stream().map(Session::toDto).collect(Collectors.toSet()),
-                user.getPasswordRecoveries().stream().map(PasswordRecovery::toDto).collect(Collectors.toSet())
+            user.getId(),
+            user.getEmail(),
+            user.getEmailVerifiedAt(),
+            user.getRegisterIp(),
+            user.isDisabled(),
+            user.getCreatedAt(),
+            user.getUpdatedAt(),
+            user.getTeams().stream().map(Team::toDto).collect(Collectors.toSet())
         );
     }
 }

@@ -2,7 +2,7 @@ package com.instantinsights.api.services;
 
 import com.instantinsights.api.dto.TeamDto;
 
-public class DefaultTeamService implements TeamService {
+public class TeamServiceImpl implements TeamService {
     @Override
     public void createTeam(String name, String description) {
 

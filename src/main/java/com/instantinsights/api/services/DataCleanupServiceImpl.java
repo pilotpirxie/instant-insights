@@ -7,11 +7,11 @@ import org.springframework.stereotype.Service;
 import java.time.LocalDateTime;
 
 @Service
-public class PostgresDataCleanupServiceService implements DataCleanupService {
+public class DataCleanupServiceImpl implements DataCleanupService {
     private final EventRepository eventRepository;
 
     @Autowired
-    public PostgresDataCleanupServiceService(EventRepository eventRepository) {
+    public DataCleanupServiceImpl(EventRepository eventRepository) {
         this.eventRepository = eventRepository;
     }
 

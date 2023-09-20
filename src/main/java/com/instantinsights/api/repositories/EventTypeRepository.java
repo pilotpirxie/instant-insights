@@ -1,7 +1,6 @@
 package com.instantinsights.api.repositories;
 
 import com.instantinsights.api.entities.App;
-import com.instantinsights.api.entities.Event;
 import com.instantinsights.api.entities.EventType;
 import jakarta.transaction.Transactional;
 import org.springframework.data.jpa.repository.JpaRepository;
