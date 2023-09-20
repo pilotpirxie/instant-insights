@@ -10,6 +10,7 @@ import java.util.UUID;
 
 @Repository
 public interface EventRepository extends JpaRepository<Event, UUID> {
+
     @Query("DELETE FROM Event e WHERE e.createdAt < :data")
     void deleteBefore(LocalDateTime data);
 }

@@ -1,11 +1,10 @@
 package com.instantinsights.api.entities;
 
-import com.instantinsights.api.utils.JsonbToMapConverter;
+import com.instantinsights.api.dto.AppDto;
 import jakarta.persistence.*;
 
 import java.time.LocalDateTime;
 import java.util.Map;
-import java.util.Set;
 import java.util.UUID;
 
 @Entity
@@ -38,7 +37,16 @@ public class App {
     @JoinColumn(name = "team_id", insertable = false, updatable = false)
     private Team team;
 
-    public App(UUID id, String name, Boolean isActive, LocalDateTime createdAt, LocalDateTime updatedAt, Map<UUID, Event> events, Map<UUID, EventType> eventTypes, Team team) {
+    public App(
+            UUID id,
+            String name,
+            Boolean isActive,
+            LocalDateTime createdAt,
+            LocalDateTime updatedAt,
+            Map<UUID, Event> events,
+            Map<UUID, EventType> eventTypes,
+            Team team
+    ) {
         this.id = id;
         this.name = name;
         this.isActive = isActive;
@@ -114,5 +122,16 @@ public class App {
 
     public void setTeam(Team team) {
         this.team = team;
+    }
+
+    public static AppDto toDto(App app) {
+        return new AppDto(
+                app.getId(),
+                app.getName(),
+                app.getActive(),
+                app.getCreatedAt(),
+                app.getUpdatedAt(),
+                Team.toDto(app.getTeam())
+        );
     }
 }

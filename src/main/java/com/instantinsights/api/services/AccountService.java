@@ -15,7 +15,7 @@ public interface AccountService {
     UserDto updateUser(UserDto userDto);
 
     void deleteUser(UUID id);
-
+ 
     void resetPassword(UUID userId);
 
     void verifyResetPasswordToken(UUID userId, String token);

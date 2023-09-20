@@ -1,5 +1,6 @@
 package com.instantinsights.api.entities;
 
+import com.instantinsights.api.dto.EventTypeDto;
 import com.instantinsights.api.utils.JsonbToMapConverter;
 import jakarta.persistence.*;
 
@@ -42,7 +43,17 @@ public class EventType {
     @OneToMany(mappedBy = "eventType")
     private Set<Event> events;
 
-    public EventType(UUID id, String name, String description, Map<String, String> schema, Boolean isActive, LocalDateTime createdAt, LocalDateTime updatedAt, App app, Set<Event> events) {
+    public EventType(
+            UUID id,
+            String name,
+            String description,
+            Map<String, String> schema,
+            Boolean isActive,
+            LocalDateTime createdAt,
+            LocalDateTime updatedAt,
+            App app,
+            Set<Event> events
+    ) {
         this.id = id;
         this.name = name;
         this.description = description;
@@ -127,5 +138,18 @@ public class EventType {
 
     public void setEvents(Set<Event> events) {
         this.events = events;
+    }
+
+    public static EventTypeDto toDto(EventType eventType) {
+        return new EventTypeDto(
+                eventType.getId(),
+                eventType.getName(),
+                eventType.getDescription(),
+                eventType.getSchema(),
+                eventType.getActive(),
+                eventType.getCreatedAt(),
+                eventType.getUpdatedAt(),
+                App.toDto(eventType.getApp())
+        );
     }
 }

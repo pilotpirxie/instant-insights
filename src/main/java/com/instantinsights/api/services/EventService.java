@@ -1,6 +1,7 @@
 package com.instantinsights.api.services;
 
 import com.instantinsights.api.dto.EventDto;
+import com.instantinsights.api.dto.EventTypeDto;
 import com.instantinsights.api.entities.App;
 import com.instantinsights.api.entities.EventType;
 
@@ -18,13 +19,28 @@ public interface EventService {
 
     void deleteEventType(String name, App app);
 
-    Set<EventType> getEventTypesForApp(String name);
+    Set<EventTypeDto> getEventTypesForApp(String name);
 
     void createEvent(UUID id, Map<String, String> meta, Map<String, String> params, EventType eventType, App app);
 
     void deleteEvent(UUID id);
 
-    List<EventDto> queryEvents(EventType eventType, LocalDateTime start, LocalDateTime end, Map<String, String> params, App app, int limit, int offset);
+    List<EventDto> queryEvents(
+        EventType eventType,
+        LocalDateTime start,
+        LocalDateTime end,
+        Map<String, String> params,
+        App app,
+        int limit,
+        UUID cursor,
+        boolean descending
+    );
 
-    int getEventsCount(EventType eventType, LocalDateTime start, LocalDateTime end, Map<String, String> params, App app);
+    long getEventsCount(
+        EventType eventType,
+        LocalDateTime start,
+        LocalDateTime end,
+        Map<String, String> params,
+        App app
+    );
 }

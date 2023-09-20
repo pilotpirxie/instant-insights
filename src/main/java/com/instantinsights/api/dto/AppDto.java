@@ -1,16 +1,14 @@
 package com.instantinsights.api.dto;
 
 import java.time.LocalDateTime;
-import java.util.Map;
 import java.util.UUID;
 
-public record EventTypeDto(
+public record AppDto(
         UUID id,
-        String name, String description,
-        Map<String, String> schema,
+        String name,
         Boolean isActive,
         LocalDateTime createdAt,
         LocalDateTime updatedAt,
-        AppDto app
+        TeamDto team
 ) {
 }

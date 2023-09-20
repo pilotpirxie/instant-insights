@@ -1,5 +1,6 @@
 package com.instantinsights.api.entities;
 
+import com.instantinsights.api.dto.EventDto;
 import com.instantinsights.api.utils.JsonbToMapConverter;
 import jakarta.persistence.*;
 
@@ -34,7 +35,14 @@ public class Event {
     @JoinColumn(name = "app_name", referencedColumnName = "name", insertable = false, updatable = false)
     private App app;
 
-    public Event(UUID id, Map<String, String> meta, Map<String, String> params, LocalDateTime createdAt, EventType eventType, App app) {
+    public Event(
+            UUID id,
+            Map<String, String> meta,
+            Map<String, String> params,
+            LocalDateTime createdAt,
+            EventType eventType,
+            App app
+    ) {
         this.id = id;
         this.meta = meta;
         this.params = params;
@@ -92,5 +100,16 @@ public class Event {
 
     public void setApp(App app) {
         this.app = app;
+    }
+
+    public static EventDto toDto(Event event) {
+        return new EventDto(
+                event.getId(),
+                event.getMeta(),
+                event.getParams(),
+                event.getCreatedAt(),
+                EventType.toDto(event.getEventType()),
+                App.toDto(event.getApp())
+        );
     }
 }
