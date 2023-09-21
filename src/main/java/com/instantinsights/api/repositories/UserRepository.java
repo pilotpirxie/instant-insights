@@ -16,4 +16,6 @@ public interface UserRepository extends JpaRepository<User, UUID> {
         nativeQuery = true
     )
     List<User> findAllByTeamId(@Param("teamId") UUID teamId);
+
+    User findByEmail(String email);
 }

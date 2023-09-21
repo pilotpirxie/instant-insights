@@ -2,14 +2,15 @@ package com.instantinsights.api.services;
 
 import com.instantinsights.api.dto.UserDto;
 import com.instantinsights.api.exceptions.AccountServiceException;
+import com.instantinsights.api.exceptions.NotFoundException;
 
 import java.util.List;
 import java.util.UUID;
 
 public interface AccountService {
-    List<UserDto> getAllUsersByTeamId(UUID teamId);
+    List<UserDto> getAllUsersInTeam(UUID teamId) throws NotFoundException;
 
-    UserDto getUserById(UUID id);
+    UserDto getUser(UUID id) throws NotFoundException;
 
     void createUser(UserDto userDto, String password) throws AccountServiceException;
 
@@ -17,35 +18,29 @@ public interface AccountService {
 
     void deleteUser(UUID id);
 
-    void resetPassword(UUID userId);
+    String generatePasswordRecoveryCode(UUID userId) throws NotFoundException;
 
-    boolean verifyResetPasswordToken(UUID userId, String token);
+    boolean verifyPasswordRecoveryCode(UUID userId, String code) throws NotFoundException;
 
-    void changePassword(UUID userId, String newPassword);
+    void changePassword(UUID userId, String newPassword) throws NotFoundException;
 
-    void changeEmail(UUID userId, String newEmail);
+    void changeEmail(UUID userId, String newEmail) throws NotFoundException, AccountServiceException;
 
-    boolean verifyEmail(UUID userId, String token);
+    boolean verifyEmail(UUID userId, String code) throws NotFoundException;
 
-    void sendResetPasswordEmail(UUID userId);
+    void enableTotp(UUID userId, String token) throws NotFoundException;
 
-    void sendVerificationEmail(UUID userId);
+    void disableTotp(UUID userId) throws NotFoundException;
 
-    void initiateTotp(UUID userId);
-
-    void disableTotp(UUID userId);
-
-    boolean verifyTotp(UUID userId, String token);
-
-    boolean verifyPassword(UUID userId, String password);
+    boolean verifyPassword(UUID userId, String password) throws NotFoundException, AccountServiceException;
 
     void logout(UUID userId);
 
-    boolean isEnabled(UUID userId);
+    boolean isEnabled(UUID userId) throws NotFoundException;
 
-    void enable(UUID userId);
+    void enable(UUID userId) throws NotFoundException;
 
-    void disable(UUID userId);
+    void disable(UUID userId) throws NotFoundException;
 
-    boolean isVerified(UUID userId);
+    boolean isVerified(UUID userId) throws NotFoundException;
 }

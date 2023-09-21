@@ -8,4 +8,5 @@ import java.util.UUID;
 
 @Repository
 public interface PasswordRecoveryRepository extends JpaRepository<PasswordRecovery, UUID> {
+    PasswordRecovery findByCodeAndUserId(String code, UUID userId);
 }
