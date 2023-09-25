@@ -1,6 +1,10 @@
 package com.instantinsights.api.services;
 
+import com.instantinsights.api.repositories.AppRepository;
+
 public class AppServiceImpl implements AppService {
+    AppRepository appRepository;
+
     @Override
     public void createApp(String name, String description) {
 

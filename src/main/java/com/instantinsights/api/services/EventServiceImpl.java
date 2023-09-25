@@ -8,7 +8,6 @@ import com.instantinsights.api.entities.EventType;
 import com.instantinsights.api.repositories.EventRepository;
 import com.instantinsights.api.repositories.EventTypeRepository;
 import com.instantinsights.api.repositories.QueryEventRepository;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import java.time.LocalDateTime;
@@ -24,7 +23,6 @@ public class EventServiceImpl implements EventService {
     private final QueryEventRepository queryEventRepository;
     private final EventTypeRepository eventTypeRepository;
 
-    @Autowired
     public EventServiceImpl(
         EventRepository eventRepository,
         QueryEventRepository queryEventRepository,
