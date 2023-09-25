@@ -1,6 +1,6 @@
 package com.instantinsights.api.services;
 
-import com.instantinsights.api.config.EmailProperties;
+import com.instantinsights.api.config.EmailConfig;
 import org.springframework.mail.SimpleMailMessage;
 import org.springframework.mail.javamail.JavaMailSender;
 import org.springframework.stereotype.Service;
@@ -9,11 +9,11 @@ import org.springframework.stereotype.Service;
 public class EmailServiceImpl implements EmailService {
 
     JavaMailSender mailer;
-    EmailProperties emailProperties;
+    EmailConfig emailConfig;
 
-    public EmailServiceImpl(JavaMailSender mailer, EmailProperties emailProperties) {
+    public EmailServiceImpl(JavaMailSender mailer, EmailConfig emailConfig) {
         this.mailer = mailer;
-        this.emailProperties = emailProperties;
+        this.emailConfig = emailConfig;
     }
 
     @Override
@@ -26,7 +26,7 @@ public class EmailServiceImpl implements EmailService {
         email.setTo(to);
         email.setSubject(subject);
         email.setText(text);
-        email.setFrom(emailProperties.getUsername());
+        email.setFrom(emailConfig.getUsername());
 
         mailer.send(email);
     }
