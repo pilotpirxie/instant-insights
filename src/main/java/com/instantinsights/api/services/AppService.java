@@ -1,9 +1,9 @@
 package com.instantinsights.api.services;
 
-public interface AppService {
-    void createApp(String name, String description);
+import java.util.UUID;
 
-    void updateApp(String name, String description);
+public interface AppService {
+    void createApp(UUID teamId, String name);
 
     void deleteApp(String name);
 
