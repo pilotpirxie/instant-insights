@@ -34,7 +34,6 @@ public class AccountServiceImpl implements AccountService {
     SessionRepository sessionRepository;
     PasswordRecoveryRepository passwordRecoveryRepository;
 
-
     public AccountServiceImpl(
         TeamRepository teamRepository,
         UserRepository userRepository,

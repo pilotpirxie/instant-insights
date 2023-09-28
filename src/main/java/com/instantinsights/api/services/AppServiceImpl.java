@@ -1,15 +1,20 @@
 package com.instantinsights.api.services;
 
+import com.instantinsights.api.dto.AppDto;
+import com.instantinsights.api.entities.App;
 import com.instantinsights.api.repositories.AppRepository;
-
-import java.util.UUID;
 
 public class AppServiceImpl implements AppService {
     AppRepository appRepository;
 
+    public AppServiceImpl(AppRepository appRepository) {
+        this.appRepository = appRepository;
+    }
+
     @Override
-    public void createApp(UUID teamId, String name) {
-        appRepository.create(teamId, name);
+    public void createApp(AppDto appDto) {
+        App app = App.fromDto(appDto);
+        appRepository.save(app);
     }
 
     @Override

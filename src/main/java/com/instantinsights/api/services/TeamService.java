@@ -2,12 +2,14 @@ package com.instantinsights.api.services;
 
 import com.instantinsights.api.dto.TeamDto;
 
+import java.util.UUID;
+
 public interface TeamService {
-    void createTeam(String name, String description);
+    void createTeam(TeamDto teamDto);
 
-    void updateTeam(String name, String description);
+    void updateTeam(TeamDto teamDto);
 
-    void deleteTeam(String name);
+    void deleteTeam(UUID id);
 
-    TeamDto getTeam(String name);
+    TeamDto getTeam(UUID id);
 }
