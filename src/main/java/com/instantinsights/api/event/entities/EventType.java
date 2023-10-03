@@ -1,7 +1,7 @@
 package com.instantinsights.api.event.entities;
 
+import com.instantinsights.api.common.utils.JsonbToMapConverter;
 import com.instantinsights.api.event.dto.EventTypeDto;
-import com.instantinsights.api.utils.JsonbToMapConverter;
 import jakarta.persistence.*;
 
 import java.time.LocalDateTime;
