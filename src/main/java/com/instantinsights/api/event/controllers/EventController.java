@@ -23,7 +23,7 @@ class EventController {
         Map<String, String> env = new HashMap<>();
         env.put("test", "test");
 
-        emailService.sendEmail("test@test.com", "test", "test");
+        emailService.sendEmail(null, null, null);
 
         return env;
     }

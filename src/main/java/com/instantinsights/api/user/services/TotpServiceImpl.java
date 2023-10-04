@@ -10,9 +10,11 @@ import dev.samstevens.totp.secret.DefaultSecretGenerator;
 import dev.samstevens.totp.secret.SecretGenerator;
 import dev.samstevens.totp.time.SystemTimeProvider;
 import dev.samstevens.totp.time.TimeProvider;
+import org.springframework.stereotype.Service;
 
 import java.util.Base64;
 
+@Service
 public class TotpServiceImpl implements TotpService {
     SecretGenerator secretGenerator = new DefaultSecretGenerator();
     TimeProvider timeProvider = new SystemTimeProvider();

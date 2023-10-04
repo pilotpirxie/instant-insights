@@ -8,6 +8,6 @@ public record SessionDto(
     String refreshToken,
     LocalDateTime createdAt,
     LocalDateTime updatedAt,
-    UserDto user
+    UUID userId
 ) {
 }

@@ -10,6 +10,7 @@ public record UserDto(
     LocalDateTime emailVerifiedAt,
     InetAddress registerIp,
     boolean isDisabled,
+    String totpToken,
     LocalDateTime createdAt,
     LocalDateTime updatedAt
 ) {

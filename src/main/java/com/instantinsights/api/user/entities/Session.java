@@ -24,16 +24,15 @@ public class Session {
     @Column(name = "updated_at", nullable = false)
     private LocalDateTime updatedAt;
 
-    @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "user_id", insertable = false, updatable = false, nullable = false)
-    private User user;
+    @Column(name = "user_id", nullable = false)
+    private UUID userId;
 
-    public Session(UUID id, String refreshToken, LocalDateTime createdAt, LocalDateTime updatedAt, User user) {
+    public Session(UUID id, String refreshToken, LocalDateTime createdAt, LocalDateTime updatedAt, UUID userId) {
         this.id = id;
         this.refreshToken = refreshToken;
         this.createdAt = createdAt;
         this.updatedAt = updatedAt;
-        this.user = user;
+        this.userId = userId;
     }
 
     public Session() {
@@ -71,12 +70,12 @@ public class Session {
         this.updatedAt = updatedAt;
     }
 
-    public User getUser() {
-        return user;
+    public UUID getUserId() {
+        return userId;
     }
 
-    public void setUser(User user) {
-        this.user = user;
+    public void setUserId(UUID userId) {
+        this.userId = userId;
     }
 
     public static SessionDto toDto(Session session) {
@@ -85,7 +84,7 @@ public class Session {
             session.getRefreshToken(),
             session.getCreatedAt(),
             session.getUpdatedAt(),
-            User.toDto(session.getUser())
+            session.getUserId()
         );
     }
 
@@ -95,7 +94,7 @@ public class Session {
             sessionDto.refreshToken(),
             sessionDto.createdAt(),
             sessionDto.updatedAt(),
-            User.fromDto(sessionDto.user())
+            sessionDto.userId()
         );
     }
 }

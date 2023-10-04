@@ -3,8 +3,10 @@ package com.instantinsights.api.user.services;
 import com.instantinsights.api.common.exceptions.NotFoundException;
 import com.instantinsights.api.team.entities.Team;
 import com.instantinsights.api.team.repositories.TeamRepository;
+import com.instantinsights.api.user.dto.SessionDto;
 import com.instantinsights.api.user.dto.UserDto;
 import com.instantinsights.api.user.entities.PasswordRecovery;
+import com.instantinsights.api.user.entities.Session;
 import com.instantinsights.api.user.entities.User;
 import com.instantinsights.api.user.exceptions.AccountServiceException;
 import com.instantinsights.api.user.repositories.PasswordRecoveryRepository;
@@ -58,6 +60,16 @@ public class AccountServiceImpl implements AccountService {
     @Override
     public UserDto getUser(UUID id) throws NotFoundException {
         User user = getUserOrThrow(id);
+
+        return User.toDto(user);
+    }
+
+    @Override
+    public UserDto getUserByEmail(String email) throws NotFoundException {
+        User user = userRepository.findByEmail(email);
+        if (user == null) {
+            throw new NotFoundException("User not found");
+        }
 
         return User.toDto(user);
     }
@@ -188,11 +200,45 @@ public class AccountServiceImpl implements AccountService {
         String hashedPassword;
         try {
             hashedPassword = getHashedPassword(password, salt);
+            System.out.println(hashedPassword);
         } catch (NoSuchAlgorithmException | InvalidKeySpecException e) {
             throw new AccountServiceException("Error hashing password", e);
         }
 
         return Objects.equals(user.getPassword(), hashedPassword);
+    }
+
+    @Override
+    public boolean checkCredentials(
+        String email,
+        String password
+    ) throws NotFoundException, AccountServiceException {
+        User user = userRepository.findByEmail(email);
+        if (user == null) {
+            throw new NotFoundException("User not found");
+        }
+
+        return verifyPassword(user.getId(), password);
+    }
+
+    @Override
+    public SessionDto login(UUID userId) throws NotFoundException {
+        User user = userRepository.findById(userId).orElse(null);
+        if (user == null) {
+            throw new NotFoundException("User not found");
+        }
+
+        Session session = new Session(
+            UUID.randomUUID(),
+            getRandomString(32),
+            LocalDateTime.now(),
+            LocalDateTime.now(),
+            userId
+        );
+
+        sessionRepository.save(session);
+
+        return Session.toDto(session);
     }
 
     @Override
@@ -255,4 +301,15 @@ public class AccountServiceImpl implements AccountService {
         }
         return user;
     }
+
+    private String getRandomString(int length) {
+        String chars = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789";
+        StringBuilder sb = new StringBuilder(length);
+        for (int i = 0; i < length; i++) {
+            sb.append(chars.charAt(secureRandom.nextInt(chars.length())));
+        }
+        return sb.toString();
+    }
+
+
 }

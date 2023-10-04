@@ -48,9 +48,6 @@ public class User {
     private LocalDateTime updatedAt;
 
     @OneToMany(mappedBy = "user")
-    private Set<Session> sessions;
-
-    @OneToMany(mappedBy = "user")
     private Set<PasswordRecovery> passwordRecoveries;
 
     public User(
@@ -65,7 +62,6 @@ public class User {
         String totpToken,
         LocalDateTime createdAt,
         LocalDateTime updatedAt,
-        Set<Session> sessions,
         Set<PasswordRecovery> passwordRecoveries
     ) {
         this.id = id;
@@ -79,7 +75,6 @@ public class User {
         this.totpToken = totpToken;
         this.createdAt = createdAt;
         this.updatedAt = updatedAt;
-        this.sessions = sessions;
         this.passwordRecoveries = passwordRecoveries;
     }
 
@@ -174,14 +169,6 @@ public class User {
         this.updatedAt = updatedAt;
     }
 
-    public Set<Session> getSessions() {
-        return sessions;
-    }
-
-    public void setSessions(Set<Session> sessions) {
-        this.sessions = sessions;
-    }
-
     public Set<PasswordRecovery> getPasswordRecoveries() {
         return passwordRecoveries;
     }
@@ -197,6 +184,7 @@ public class User {
             user.getEmailVerifiedAt(),
             user.getRegisterIp(),
             user.isDisabled(),
+            user.getTotpToken(),
             user.getCreatedAt(),
             user.getUpdatedAt()
         );
@@ -212,10 +200,9 @@ public class User {
             userDto.emailVerifiedAt(),
             userDto.registerIp(),
             userDto.isDisabled(),
-            null,
+            userDto.totpToken(),
             userDto.createdAt(),
             userDto.updatedAt(),
-            Set.of(),
             Set.of()
         );
     }

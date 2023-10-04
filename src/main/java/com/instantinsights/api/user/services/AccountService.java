@@ -1,6 +1,7 @@
 package com.instantinsights.api.user.services;
 
 import com.instantinsights.api.common.exceptions.NotFoundException;
+import com.instantinsights.api.user.dto.SessionDto;
 import com.instantinsights.api.user.dto.UserDto;
 import com.instantinsights.api.user.exceptions.AccountServiceException;
 
@@ -11,6 +12,8 @@ public interface AccountService {
     List<UserDto> getAllUsersInTeam(UUID teamId) throws NotFoundException;
 
     UserDto getUser(UUID id) throws NotFoundException;
+
+    UserDto getUserByEmail(String email) throws NotFoundException;
 
     void createUser(UserDto userDto, String password) throws AccountServiceException;
 
@@ -33,6 +36,10 @@ public interface AccountService {
     void disableTotp(UUID userId) throws NotFoundException;
 
     boolean verifyPassword(UUID userId, String password) throws NotFoundException, AccountServiceException;
+
+    boolean checkCredentials(String email, String password) throws NotFoundException, AccountServiceException;
+
+    SessionDto login(UUID userId) throws NotFoundException;
 
     void logout(UUID userId);
 
