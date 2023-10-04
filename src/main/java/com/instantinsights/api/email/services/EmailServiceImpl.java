@@ -1,6 +1,6 @@
 package com.instantinsights.api.email.services;
 
-import com.instantinsights.api.config.EmailConfig;
+import com.instantinsights.api.common.config.EmailConfig;
 import org.springframework.mail.SimpleMailMessage;
 import org.springframework.mail.javamail.JavaMailSender;
 import org.springframework.stereotype.Service;

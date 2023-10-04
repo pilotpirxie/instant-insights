@@ -1,4 +1,4 @@
-package com.instantinsights.api.config;
+package com.instantinsights.api.common.config;
 
 import com.instantinsights.api.jwt.services.JwtService;
 import io.jsonwebtoken.Claims;

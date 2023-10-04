@@ -1,7 +1,7 @@
 package com.instantinsights.api.user.controllers;
 
+import com.instantinsights.api.common.config.JwtConfig;
 import com.instantinsights.api.common.exceptions.NotFoundException;
-import com.instantinsights.api.config.JwtConfig;
 import com.instantinsights.api.jwt.services.JwtService;
 import com.instantinsights.api.user.dto.JwtTokensDto;
 import com.instantinsights.api.user.dto.LoginRequestDto;

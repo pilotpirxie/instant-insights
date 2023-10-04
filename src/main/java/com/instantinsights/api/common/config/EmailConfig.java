@@ -1,4 +1,4 @@
-package com.instantinsights.api.config;
+package com.instantinsights.api.common.config;
 
 import org.springframework.boot.context.properties.ConfigurationProperties;
 import org.springframework.context.annotation.Configuration;
