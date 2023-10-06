@@ -1,5 +1,6 @@
-package com.instantinsights.api.common.config;
+package com.instantinsights.api.jwt.filters;
 
+import com.instantinsights.api.common.config.JwtConfig;
 import com.instantinsights.api.jwt.services.JwtService;
 import io.jsonwebtoken.Claims;
 import jakarta.servlet.*;
@@ -54,7 +55,7 @@ public class JwtAuthenticationFilter implements Filter {
             return;
         }
 
-        Claims claims = jwtService.getClaims(jwt, key);
+        Claims claims = jwtService.getClaims(jwt);
         String subject = claims.getSubject();
         request.setAttribute("subject", subject);
         filterChain.doFilter(request, response);
