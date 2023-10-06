@@ -1,6 +1,6 @@
 package com.instantinsights.api.user.services;
 
-import com.instantinsights.api.common.exceptions.NotFoundHttpException;
+import com.instantinsights.api.common.exceptions.NotFoundException;
 import com.instantinsights.api.user.dto.SessionDto;
 import com.instantinsights.api.user.dto.UserDto;
 import com.instantinsights.api.user.exceptions.AccountServiceException;
@@ -9,11 +9,11 @@ import java.util.List;
 import java.util.UUID;
 
 public interface AccountService {
-    List<UserDto> getAllUsersInTeam(UUID teamId) throws NotFoundHttpException;
+    List<UserDto> getAllUsersInTeam(UUID teamId) throws NotFoundException;
 
-    UserDto getUser(UUID id) throws NotFoundHttpException;
+    UserDto getUser(UUID id) throws NotFoundException;
 
-    UserDto getUserByEmail(String email) throws NotFoundHttpException;
+    UserDto getUserByEmail(String email) throws NotFoundException;
 
     void createUser(UserDto userDto, String password) throws AccountServiceException;
 
@@ -21,33 +21,33 @@ public interface AccountService {
 
     void deleteUser(UUID id);
 
-    String generatePasswordRecoveryCode(UUID userId) throws NotFoundHttpException;
+    String generatePasswordRecoveryCode(UUID userId) throws NotFoundException;
 
-    boolean verifyPasswordRecoveryCode(UUID userId, String code) throws NotFoundHttpException;
+    boolean verifyPasswordRecoveryCode(UUID userId, String code) throws NotFoundException;
 
-    void changePassword(UUID userId, String newPassword) throws NotFoundHttpException;
+    void changePassword(UUID userId, String newPassword) throws NotFoundException;
 
-    void changeEmail(UUID userId, String newEmail) throws NotFoundHttpException, AccountServiceException;
+    void changeEmail(UUID userId, String newEmail) throws NotFoundException, AccountServiceException;
 
-    boolean verifyEmail(UUID userId, String code) throws NotFoundHttpException;
+    boolean verifyEmail(UUID userId, String code) throws NotFoundException;
 
-    void enableTotp(UUID userId, String token) throws NotFoundHttpException;
+    void enableTotp(UUID userId, String token) throws NotFoundException;
 
-    void disableTotp(UUID userId) throws NotFoundHttpException;
+    void disableTotp(UUID userId) throws NotFoundException;
 
-    boolean verifyPassword(UUID userId, String password) throws NotFoundHttpException, AccountServiceException;
+    boolean verifyPassword(UUID userId, String password) throws NotFoundException, AccountServiceException;
 
-    boolean checkCredentials(String email, String password) throws NotFoundHttpException, AccountServiceException;
+    boolean checkCredentials(String email, String password) throws NotFoundException, AccountServiceException;
 
-    SessionDto login(UUID userId) throws NotFoundHttpException;
+    SessionDto login(UUID userId) throws NotFoundException;
 
     void logout(UUID userId);
 
-    boolean isEnabled(UUID userId) throws NotFoundHttpException;
+    boolean isEnabled(UUID userId) throws NotFoundException;
 
-    void enable(UUID userId) throws NotFoundHttpException;
+    void enable(UUID userId) throws NotFoundException;
 
-    void disable(UUID userId) throws NotFoundHttpException;
+    void disable(UUID userId) throws NotFoundException;
 
-    boolean isVerified(UUID userId) throws NotFoundHttpException;
+    boolean isVerified(UUID userId) throws NotFoundException;
 }

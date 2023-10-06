@@ -1,6 +1,6 @@
 package com.instantinsights.api.user.services;
 
-import com.instantinsights.api.common.exceptions.NotFoundHttpException;
+import com.instantinsights.api.common.exceptions.NotFoundException;
 import com.instantinsights.api.team.entities.Team;
 import com.instantinsights.api.team.repositories.TeamRepository;
 import com.instantinsights.api.user.dto.SessionDto;
@@ -49,26 +49,26 @@ public class AccountServiceImpl implements AccountService {
     }
 
     @Override
-    public List<UserDto> getAllUsersInTeam(UUID teamId) throws NotFoundHttpException {
+    public List<UserDto> getAllUsersInTeam(UUID teamId) throws NotFoundException {
         Team team = teamRepository.findById(teamId).orElse(null);
         if (team == null) {
-            throw new NotFoundHttpException("Team not found");
+            throw new NotFoundException("Team not found");
         }
         return userRepository.findAllByTeamId(teamId).stream().map(User::toDto).collect(Collectors.toList());
     }
 
     @Override
-    public UserDto getUser(UUID id) throws NotFoundHttpException {
+    public UserDto getUser(UUID id) throws NotFoundException {
         User user = getUserOrThrow(id);
 
         return User.toDto(user);
     }
 
     @Override
-    public UserDto getUserByEmail(String email) throws NotFoundHttpException {
+    public UserDto getUserByEmail(String email) throws NotFoundException {
         User user = userRepository.findByEmail(email);
         if (user == null) {
-            throw new NotFoundHttpException("User not found");
+            throw new NotFoundException("User not found");
         }
 
         return User.toDto(user);
@@ -105,7 +105,7 @@ public class AccountServiceImpl implements AccountService {
     }
 
     @Override
-    public String generatePasswordRecoveryCode(UUID userId) throws NotFoundHttpException {
+    public String generatePasswordRecoveryCode(UUID userId) throws NotFoundException {
         getUserOrThrow(userId);
 
         byte[] code = new byte[16];
@@ -119,7 +119,7 @@ public class AccountServiceImpl implements AccountService {
     }
 
     @Override
-    public boolean verifyPasswordRecoveryCode(UUID userId, String code) throws NotFoundHttpException {
+    public boolean verifyPasswordRecoveryCode(UUID userId, String code) throws NotFoundException {
         getUserOrThrow(userId);
 
         PasswordRecovery passwordRecovery = passwordRecoveryRepository.findByCodeAndUserId(code, userId);
@@ -133,7 +133,7 @@ public class AccountServiceImpl implements AccountService {
     }
 
     @Override
-    public void changePassword(UUID userId, String newPassword) throws NotFoundHttpException {
+    public void changePassword(UUID userId, String newPassword) throws NotFoundException {
         User user = getUserOrThrow(userId);
 
         byte[] salt = decodeBytes(user.getSalt());
@@ -141,7 +141,7 @@ public class AccountServiceImpl implements AccountService {
         try {
             hashedPassword = getHashedPassword(newPassword, salt);
         } catch (NoSuchAlgorithmException | InvalidKeySpecException e) {
-            throw new NotFoundHttpException("Error hashing password", e);
+            throw new NotFoundException("Error hashing password", e);
         }
 
         user.setPassword(hashedPassword);
@@ -149,7 +149,7 @@ public class AccountServiceImpl implements AccountService {
     }
 
     @Override
-    public void changeEmail(UUID userId, String newEmail) throws NotFoundHttpException, AccountServiceException {
+    public void changeEmail(UUID userId, String newEmail) throws NotFoundException, AccountServiceException {
         User user = getUserOrThrow(userId);
 
         User existingUser = userRepository.findByEmail(newEmail);
@@ -163,7 +163,7 @@ public class AccountServiceImpl implements AccountService {
     }
 
     @Override
-    public boolean verifyEmail(UUID userId, String code) throws NotFoundHttpException {
+    public boolean verifyEmail(UUID userId, String code) throws NotFoundException {
         User user = getUserOrThrow(userId);
 
         if (!Objects.equals(user.getEmailVerificationCode(), code)) {
@@ -177,7 +177,7 @@ public class AccountServiceImpl implements AccountService {
     }
 
     @Override
-    public void disableTotp(UUID userId) throws NotFoundHttpException {
+    public void disableTotp(UUID userId) throws NotFoundException {
         User user = getUserOrThrow(userId);
 
         user.setTotpToken(null);
@@ -185,7 +185,7 @@ public class AccountServiceImpl implements AccountService {
     }
 
     @Override
-    public void enableTotp(UUID userId, String token) throws NotFoundHttpException {
+    public void enableTotp(UUID userId, String token) throws NotFoundException {
         User user = getUserOrThrow(userId);
 
         user.setTotpToken(token);
@@ -193,7 +193,7 @@ public class AccountServiceImpl implements AccountService {
     }
 
     @Override
-    public boolean verifyPassword(UUID userId, String password) throws NotFoundHttpException, AccountServiceException {
+    public boolean verifyPassword(UUID userId, String password) throws NotFoundException, AccountServiceException {
         User user = getUserOrThrow(userId);
 
         byte[] salt = decodeBytes(user.getSalt());
@@ -212,20 +212,20 @@ public class AccountServiceImpl implements AccountService {
     public boolean checkCredentials(
         String email,
         String password
-    ) throws NotFoundHttpException, AccountServiceException {
+    ) throws NotFoundException, AccountServiceException {
         User user = userRepository.findByEmail(email);
         if (user == null) {
-            throw new NotFoundHttpException("User not found");
+            throw new NotFoundException("User not found");
         }
 
         return verifyPassword(user.getId(), password);
     }
 
     @Override
-    public SessionDto login(UUID userId) throws NotFoundHttpException {
+    public SessionDto login(UUID userId) throws NotFoundException {
         User user = userRepository.findById(userId).orElse(null);
         if (user == null) {
-            throw new NotFoundHttpException("User not found");
+            throw new NotFoundException("User not found");
         }
 
         Session session = new Session(
@@ -247,14 +247,14 @@ public class AccountServiceImpl implements AccountService {
     }
 
     @Override
-    public boolean isEnabled(UUID userId) throws NotFoundHttpException {
+    public boolean isEnabled(UUID userId) throws NotFoundException {
         User user = getUserOrThrow(userId);
 
         return !user.isDisabled();
     }
 
     @Override
-    public void enable(UUID userId) throws NotFoundHttpException {
+    public void enable(UUID userId) throws NotFoundException {
         User user = getUserOrThrow(userId);
 
         user.setDisabled(false);
@@ -262,7 +262,7 @@ public class AccountServiceImpl implements AccountService {
     }
 
     @Override
-    public void disable(UUID userId) throws NotFoundHttpException {
+    public void disable(UUID userId) throws NotFoundException {
         User user = getUserOrThrow(userId);
 
         user.setDisabled(true);
@@ -270,7 +270,7 @@ public class AccountServiceImpl implements AccountService {
     }
 
     @Override
-    public boolean isVerified(UUID userId) throws NotFoundHttpException {
+    public boolean isVerified(UUID userId) throws NotFoundException {
         User user = getUserOrThrow(userId);
 
         return user.getEmailVerifiedAt() != null;
@@ -294,10 +294,10 @@ public class AccountServiceImpl implements AccountService {
         return encodeBytes(hash);
     }
 
-    private User getUserOrThrow(UUID id) throws NotFoundHttpException {
+    private User getUserOrThrow(UUID id) throws NotFoundException {
         User user = userRepository.findById(id).orElse(null);
         if (user == null) {
-            throw new NotFoundHttpException("User not found");
+            throw new NotFoundException("User not found");
         }
         return user;
     }
@@ -310,6 +310,4 @@ public class AccountServiceImpl implements AccountService {
         }
         return sb.toString();
     }
-
-
 }

@@ -2,7 +2,9 @@ package com.instantinsights.api.user.controllers;
 
 import com.instantinsights.api.common.config.JwtConfig;
 import com.instantinsights.api.common.exceptions.BadRequestHttpException;
+import com.instantinsights.api.common.exceptions.NotFoundException;
 import com.instantinsights.api.common.exceptions.NotFoundHttpException;
+import com.instantinsights.api.common.exceptions.ServiceUnavailableHttpException;
 import com.instantinsights.api.jwt.services.JwtService;
 import com.instantinsights.api.user.dto.*;
 import com.instantinsights.api.user.exceptions.AccountServiceException;
@@ -37,24 +39,37 @@ public class AuthController {
 
     @PostMapping("/totp-status")
     public TotpStatusResponseDto totpStatus(@RequestBody TotpStatusRequestDto totpStatusRequest) throws NotFoundHttpException {
-        UserDto user = accountService.getUserByEmail(totpStatusRequest.email());
-
-        if (user == null) {
-            throw new NotFoundHttpException("User not found");
+        UserDto user;
+        try {
+            user = accountService.getUserByEmail(totpStatusRequest.email());
+        } catch (NotFoundException e) {
+            throw new NotFoundHttpException(e.getMessage());
         }
 
         return new TotpStatusResponseDto(user.totpToken() != null);
     }
 
     @PostMapping("/login")
-    public JwtTokensResponseDto login(@RequestBody LoginRequestDto loginRequest) throws NotFoundHttpException, AccountServiceException, BadRequestHttpException {
-        boolean areCredentialsValid = accountService.checkCredentials(loginRequest.email(), loginRequest.password());
+    public JwtTokensResponseDto login(@RequestBody LoginRequestDto loginRequest) throws BadRequestHttpException, NotFoundHttpException, ServiceUnavailableHttpException {
+        boolean areCredentialsValid;
+        try {
+            areCredentialsValid = accountService.checkCredentials(loginRequest.email(), loginRequest.password());
+        } catch (NotFoundException e) {
+            throw new NotFoundHttpException(e.getMessage());
+        } catch (AccountServiceException e) {
+            throw new ServiceUnavailableHttpException(e.getMessage());
+        }
 
         if (!areCredentialsValid) {
             throw new BadRequestHttpException("Invalid credentials");
         }
 
-        UserDto user = accountService.getUserByEmail(loginRequest.email());
+        UserDto user;
+        try {
+            user = accountService.getUserByEmail(loginRequest.email());
+        } catch (NotFoundException e) {
+            throw new NotFoundHttpException(e.getMessage());
+        }
 
         if (user.isDisabled()) {
             throw new BadRequestHttpException("Account is disabled");
@@ -76,19 +91,29 @@ public class AuthController {
             }
         }
 
-        SessionDto sessionDto = accountService.login(user.id());
+        SessionDto sessionDto;
+        try {
+            sessionDto = accountService.login(user.id());
+        } catch (NotFoundException e) {
+            throw new NotFoundHttpException(e.getMessage());
+        }
+
         Key accessTokenKey = jwtService.getKey(jwtConfig.getSecret());
         Key refreshTokenKey = jwtService.getKey(sessionDto.refreshToken());
 
         return new JwtTokensResponseDto(
-            jwtService.generateToken(user.id().toString(),
-                                     accessTokenKey,
-                                     jwtConfig.getAccessTokenExpiration(),
-                                     sessionDto.id().toString()),
-            jwtService.generateToken(user.id().toString(),
-                                     refreshTokenKey,
-                                     jwtConfig.getRefreshTokenExpiration(),
-                                     sessionDto.id().toString())
+            jwtService.generateToken(
+                user.id().toString(),
+                accessTokenKey,
+                jwtConfig.getAccessTokenExpiration(),
+                sessionDto.id().toString()
+            ),
+            jwtService.generateToken(
+                user.id().toString(),
+                refreshTokenKey,
+                jwtConfig.getRefreshTokenExpiration(),
+                sessionDto.id().toString()
+            )
         );
     }
 

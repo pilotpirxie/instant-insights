@@ -1,6 +1,6 @@
 package com.instantinsights.api.common.exceptions;
 
-public class UnauthorizedHttpException extends Exception {
+public class UnauthorizedHttpException extends RuntimeException {
     public UnauthorizedHttpException(String message) {
         super(message);
     }

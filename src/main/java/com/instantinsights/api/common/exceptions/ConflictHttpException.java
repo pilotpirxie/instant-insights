@@ -1,6 +1,6 @@
 package com.instantinsights.api.common.exceptions;
 
-public class ConflictHttpException extends Exception {
+public class ConflictHttpException extends RuntimeException {
     public ConflictHttpException(String message) {
         super(message);
     }
