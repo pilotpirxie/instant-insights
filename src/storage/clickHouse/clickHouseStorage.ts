@@ -1,10 +1,10 @@
 import 'dotenv';
-import { ClickHouseClient } from '@clickhouse/client';
+import {ClickHouseClient} from '@clickhouse/client';
 import path from 'path';
 import fs from 'fs';
 import dayjs from 'dayjs';
 import utc from 'dayjs/plugin/utc';
-import { CronJob } from 'cron';
+import {CronJob} from 'cron';
 import {
   AddEvent,
   AddLinkHit,
@@ -20,14 +20,14 @@ import {
   Timespan,
   UpdateSession,
 } from '../dataStorage';
-import { EventEntity, LinkHitEntity } from './entities';
-import { Event } from '../../domain/event';
-import { Pathname } from '../../domain/pathname';
-import { Type } from '../../domain/type';
-import { User } from '../../domain/user';
-import { Session } from '../../domain/session';
-import { Summary } from '../../domain/summary';
-import { EventsExplorerData } from '../../domain/eventsExplorerData';
+import {EventEntity, LinkHitEntity} from './entities';
+import {Event} from '../../domain/event';
+import {Pathname} from '../../domain/pathname';
+import {Type} from '../../domain/type';
+import {User} from '../../domain/user';
+import {Session} from '../../domain/session';
+import {Summary} from '../../domain/summary';
+import {EventsExplorerData} from '../../domain/eventsExplorerData';
 import Links from '../../domain/links';
 import RedirectLink from '../../domain/redirectLink';
 
@@ -78,6 +78,13 @@ export class ClickHouseStorage implements DataStorage {
       const nextBackupDates = backupCron.nextDates();
       console.info('Next backup run at', nextBackupDates.toFormat('yyyy-MM-dd HH:mm:ss'));
     }
+
+    const deleteOldEventsCron = new CronJob(
+      '0 0 * * *',
+      () => this.deleteEventsOlderThan(dayjs().utc().subtract(3, 'month').toDate()),
+      null,
+    );
+    deleteOldEventsCron.start();
   }
 
   async addSession(data: AddSession): Promise<void> {
@@ -179,7 +186,7 @@ export class ClickHouseStorage implements DataStorage {
       const migrationFile = path.join(dir, file);
 
       console.info(`Migrating ${migrationFile}`);
-      const migrationFileContent = fs.readFileSync(migrationFile, { encoding: 'utf8' });
+      const migrationFileContent = fs.readFileSync(migrationFile, {encoding: 'utf8'});
       await this.storageConfig.clickHouse.exec({
         query: migrationFileContent,
       });
@@ -187,8 +194,8 @@ export class ClickHouseStorage implements DataStorage {
   }
 
   async addEvent({
-    type, params, meta, fingerprint, pathname,
-  }: AddEvent): Promise<void> {
+                   type, params, meta, fingerprint, pathname,
+                 }: AddEvent): Promise<void> {
     this.localEvents.push({
       pathname,
       fingerprint,
@@ -201,8 +208,8 @@ export class ClickHouseStorage implements DataStorage {
   }
 
   async addLinkHit({
-    name, meta, params,
-  }: AddLinkHit): Promise<void> {
+                     name, meta, params,
+                   }: AddLinkHit): Promise<void> {
     this.localLinkHits.push({
       name,
       meta,
@@ -234,8 +241,8 @@ export class ClickHouseStorage implements DataStorage {
   }
 
   async getEvents({
-    pathname, type, fingerprint, dateFrom, dateTo, limit,
-  }: SearchForEvents): Promise<Event[]> {
+                    pathname, type, fingerprint, dateFrom, dateTo, limit,
+                  }: SearchForEvents): Promise<Event[]> {
     let query = 'SELECT * FROM events WHERE created_at >= {dateFrom: DATETIME}';
 
     if (dateTo) {
@@ -274,7 +281,7 @@ export class ClickHouseStorage implements DataStorage {
     return Promise.resolve(events);
   }
 
-  async countOnline({ pathname }: CountOnline): Promise<number> {
+  async countOnline({pathname}: CountOnline): Promise<number> {
     let query = 'SELECT COUNT(DISTINCT fingerprint) as online FROM events WHERE (created_at > now() - INTERVAL {onlineTimespan: INT} MINUTE)';
 
     if (pathname) {
@@ -290,13 +297,13 @@ export class ClickHouseStorage implements DataStorage {
       format: 'JSONEachRow',
     });
 
-    const parsedResponse = await response.json() as {online: string}[];
+    const parsedResponse = await response.json() as { online: string }[];
     const online = Number(parsedResponse[0].online);
     console.info('Found', online, 'online users in the last', this.storageConfig.onlineTimespan, 'minutes');
     return Promise.resolve(online);
   }
 
-  async getPathnames({ dateTo, dateFrom }: Timespan): Promise<Pathname[]> {
+  async getPathnames({dateTo, dateFrom}: Timespan): Promise<Pathname[]> {
     let query = 'SELECT pathname, COUNT(*) count FROM events WHERE created_at >= {dateFrom: DATETIME}';
 
     if (dateTo) {
@@ -318,7 +325,7 @@ export class ClickHouseStorage implements DataStorage {
     return Promise.resolve(parsedResponse);
   }
 
-  async getTypes({ dateTo, dateFrom }: Timespan): Promise<Type[]> {
+  async getTypes({dateTo, dateFrom}: Timespan): Promise<Type[]> {
     let query = 'SELECT type, COUNT(*) count FROM events WHERE created_at >= {dateFrom: DATETIME}';
 
     if (dateTo) {
@@ -393,7 +400,7 @@ export class ClickHouseStorage implements DataStorage {
       format: 'JSONEachRow',
     });
 
-    const parsedResponseOnline = await responseOnline.json() as {online: string}[];
+    const parsedResponseOnline = await responseOnline.json() as { online: string }[];
     const online = Number(parsedResponseOnline[0].online);
 
     const response24h = await this.storageConfig.clickHouse.query({
@@ -404,11 +411,11 @@ export class ClickHouseStorage implements DataStorage {
       format: 'JSONEachRow',
     });
 
-    const parsedResponse24h = await response24h.json() as {unique: string, events: string}[];
+    const parsedResponse24h = await response24h.json() as { unique: string, events: string }[];
     const unique = Number(parsedResponse24h[0].unique);
     const events = Number(parsedResponse24h[0].events);
 
-    return Promise.resolve({ online, events, unique });
+    return Promise.resolve({online, events, unique});
   }
 
   async getEventsCount(data: EventsExplorer): Promise<EventsExplorerData> {
@@ -459,7 +466,7 @@ export class ClickHouseStorage implements DataStorage {
       format: 'JSONEachRow',
     });
 
-    const parsedResponse = await response.json() as {count: string, date: string}[];
+    const parsedResponse = await response.json() as { count: string, date: string }[];
     const result: EventsExplorerData = {
       data: [],
       labels: [],
@@ -484,6 +491,7 @@ export class ClickHouseStorage implements DataStorage {
     }
 
     query += ' GROUP BY pathname ORDER BY count DESC';
+
     const response = await this.storageConfig.clickHouse.query({
       query,
       query_params: {
@@ -494,7 +502,7 @@ export class ClickHouseStorage implements DataStorage {
       format: 'JSONEachRow',
     });
 
-    const parsedResponse = await response.json() as {count: string, pathname: string}[];
+    const parsedResponse = await response.json() as { count: string, pathname: string }[];
     const result: EventsExplorerData = {
       data: [],
       labels: [],
@@ -555,7 +563,7 @@ export class ClickHouseStorage implements DataStorage {
       format: 'JSONEachRow',
     });
 
-    const parsedResponse = await response.json() as {count: string, date: string}[];
+    const parsedResponse = await response.json() as { count: string, date: string }[];
     const result: EventsExplorerData = {
       data: [],
       labels: [],
@@ -566,5 +574,16 @@ export class ClickHouseStorage implements DataStorage {
       result.data.push(Number(item.count));
     });
     return Promise.resolve(result);
+  }
+
+  async deleteEventsOlderThan(date: Date): Promise<void> {
+    await this.storageConfig.clickHouse.query({
+      query: 'ALTER TABLE events DELETE WHERE created_at < {date: DATETIME}',
+      query_params: {
+        date: dayjs(date).utc().format('YYYY-MM-DD HH:mm:ss'),
+      },
+    });
+
+    return Promise.resolve();
   }
 }
