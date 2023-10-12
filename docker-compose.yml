@@ -2,20 +2,12 @@ version: '3.9'
 
 services:
   db:
-    image: clickhouse/clickhouse-server:latest
-    ports:
-      - "8123:8123"
-      - "9000:9000"
-    volumes:
-      - ./.docker/clickhouse:/var/lib/clickhouse/
-      - ./.docker/clickhouse-server:/var/lib/clickhouse-server/
-    ulimits:
-      nofile:
-        soft: 262144
-        hard: 262144
+    image: postgres:15-alpine
     environment:
-      CLICKHOUSE_DB: insights
-      CLICKHOUSE_USER: secretuser
-      CLICKHOUSE_PASSWORD: mysecretpassword
-      CLICKHOUSE_DEFAULT_ACCESS_MANAGEMENT: 1
-    restart: unless-stopped
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: postgres
+      POSTGRES_DB: postgres
+    ports:
+        - 5432:5432
+    volumes:
+        - ./.docker/db:/var/lib/postgresql/data
