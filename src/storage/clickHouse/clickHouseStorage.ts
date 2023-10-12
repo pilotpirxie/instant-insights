@@ -134,7 +134,7 @@ export class ClickHouseStorage implements DataStorage {
           values: [...this.localEvents],
           format: 'JSONEachRow',
         });
-        console.info('Batch insert of', this.localEvents.length, 'events finished');
+        // console.info('Batch insert of', this.localEvents.length, 'events finished');
         this.localEvents = [];
       } catch (err) {
         console.error('Failed to insert', this.localEvents.length, 'events');
@@ -151,7 +151,7 @@ export class ClickHouseStorage implements DataStorage {
           values: [...this.localLinkHits],
           format: 'JSONEachRow',
         });
-        console.info('Batch insert of', this.localLinkHits.length, 'link hits finished');
+        // console.info('Batch insert of', this.localLinkHits.length, 'link hits finished');
         this.localLinkHits = [];
 
         return Promise.resolve();
